@@ -21,8 +21,7 @@ Statistical Analysis in Biology and Environmental Science
 
 This site organizes the 13 weekly labs for BIOL/OCSC 4605 (undergraduate) / BIOL 7220
 (graduate). The six-part curriculum was originally developed by Dr. David C.
-Schneider — his site, [*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/){:target="_blank"},
-is kept here for reference. For the current offering, lectures are delivered
+Schneider ([*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/){:target="_blank"}), and the site is kept here for reference. For the current offering, lectures are delivered
 by Dr. Amy Hurford ([lecture notes](https://ahurford.github.io/biol-4605-f26/){:target="_blank"}),
 and this site covers the labs.
 
@@ -33,8 +32,7 @@ resampling extensions (Parts 5–6).
 
 ## How this site is organized
 
-- **[Schedule]({{ '/schedule/' | relative_url }})**: the full 13-week table (module, lecture mapping,
-  objectives, deliverables, software) generated from [`_data/labs.yml`](https://github.com/abdouf/biol4605-labs-site/blob/main/_data/labs.yml).
+- **[Schedule]({{ '/schedule/' | relative_url }})**: the full 13-week table, which includes module, lecture mapping, objectives, deliverables and software.
 - **[Labs]({{ '/labs/' | relative_url }})**: one page per week with objectives, deliverables, and a
   link to the downloadable R Markdown starter file for that lab.
 - **[Syllabus overview]({{ '/syllabus/' | relative_url }})**: how the six curriculum parts map onto
