@@ -9,8 +9,7 @@ permalink: /labs/
 # Labs
 
 One page per week. Each links to the downloadable R Markdown starter file
-(`rmd/labNN-*.Rmd`) for that lab, generated from the shared
-[`templates/lab_template.Rmd`](https://github.com/abdouf/biol4605-labs-site/blob/main/templates/lab_template.Rmd).
+(`rmd/labNN-*.Rmd`) for that lab.
 See the [Schedule]({{ '/schedule/' | relative_url }}) for the full table view.
 
 <ul>
