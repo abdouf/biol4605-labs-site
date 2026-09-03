@@ -21,8 +21,8 @@ permalink: /resources/
 - Dr. Amy Hurford's lecture notes for the current offering:
   [BIOL/OCSC 4605 · 7220 course site](https://ahurford.github.io/biol-4605-f26/){:target="_blank"}
   (Fall 2026). This lab site follows the same weekly pacing.
-- Dr. David C. Schneider's original course site, [*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/){:target="_blank"} —
-  he developed the six-part curriculum (*Statistical Analysis in Biology and
+- Dr. David C. Schneider's original course site, [*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/){:target="_blank"}.
+  Dr Schneider developed the six-part curriculum (*Statistical Analysis in Biology and
   Environmental Science*) both the lectures and this lab sequence are built
   on. Kept here for reference only; it is not the current course site.
 
@@ -51,5 +51,5 @@ install.packages(c(
 - Office hours: CSF 2211 Tuesday 9:00 AM to 5:00 PM
 - Course discussion board / email: amf347@mun.ca
 - R debugging first step: read the error message top line, then check
-  `traceback()` — most lab errors are a missing package or a mismatched
+  `traceback()`. Most lab errors are a missing package or a mismatched
   column name.
