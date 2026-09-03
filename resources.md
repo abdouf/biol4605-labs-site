@@ -18,10 +18,6 @@ permalink: /resources/
 
 ## Primary course references
 
-<<<<<<< HEAD
-- David C. Schneider, [*Statistical Analysis in Biology and Environmental Science*](https://davidcschneider.github.io/StatisticalScience/){:target="_blank"} —
-  this course's lab sequence follows this text's six-part structure.
-=======
 - Dr. Amy Hurford's lecture notes for the current offering:
   [BIOL/OCSC 4605 · 7220 course site](https://ahurford.github.io/biol-4605-f26/){:target="_blank"}
   (Fall 2026). This lab site follows the same weekly pacing.
@@ -29,7 +25,6 @@ permalink: /resources/
   he developed the six-part curriculum (*Statistical Analysis in Biology and
   Environmental Science*) both the lectures and this lab sequence are built
   on. Kept here for reference only; it is not the current course site.
->>>>>>> 6b0c2f6 (Fix broken links, remove duplicate deploy workflow, reconcile attribution)
 
 ## Software
 
@@ -50,12 +45,6 @@ install.packages(c(
   "here"         # project-relative file paths
 ))
 ```
-
-## Getting a lab file
-
-Each week's starter file lives under [`/rmd`](https://github.com/abdouf/biol4605-labs-site/tree/main/rmd)
-in the repo and is linked from that week's page under [Labs]({{ '/labs/' | relative_url }}). Download
-the `.Rmd`, open it in RStudio, and knit to check it runs before editing.
 
 ## Getting help
 

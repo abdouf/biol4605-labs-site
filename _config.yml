@@ -38,7 +38,7 @@ back_to_top: true
 back_to_top_text: "Back to top"
 
 aux_links:
-  "Course repo on GitHub":
+  "Labs repo on GitHub":
     - "https://github.com/abdouf/biol4605-labs-site"
   "Lectures (Dr. Hurford)":
     - "https://ahurford.github.io/biol-4605-f26/"

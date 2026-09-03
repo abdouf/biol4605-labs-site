@@ -8,14 +8,10 @@ permalink: /syllabus/
 # Syllabus overview
 {: .no_toc }
 
-<<<<<<< HEAD
-The six parts of the Course map onto the 13 lab weeks. See [Schedule](/schedule/) for full weekly detail.
-=======
 The six-part curriculum Dr. David C. Schneider originally developed — now
 delivered as [lectures by Dr. Amy Hurford](https://ahurford.github.io/biol-4605-f26/){:target="_blank"}
 and as these labs — maps onto the 13 lab weeks below. See
 [Schedule]({{ '/schedule/' | relative_url }}) for full weekly detail.
->>>>>>> 6b0c2f6 (Fix broken links, remove duplicate deploy workflow, reconcile attribution)
 {: .fs-6 .fw-300 }
 
 ## Table of contents
