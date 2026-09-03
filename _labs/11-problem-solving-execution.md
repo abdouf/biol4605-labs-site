@@ -10,6 +10,8 @@ permalink: /labs/11/
 
 **Module:** Parts 3–5: Applied Integration
 
+Location: CSF BIOL 2218B Computer Lab
+
 > Full analytical pipeline. Data cleaning, model fitting, model selection, diagnostic checking, and biological interpretation.
 {: .objectives }
 
@@ -21,8 +23,6 @@ permalink: /labs/11/
 [Download lab09b-problem-solving-execution.Rmd]({{ '/rmd/lab09b-problem-solving-execution.Rmd' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})

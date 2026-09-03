@@ -10,6 +10,8 @@ permalink: /labs/10/
 
 **Module:** Parts 3–5: Applied Integration
 
+Location: CSF BIOL 2218B Computer Lab
+
 > Experimental setup & data structuring. Formulating research questions into verifiable statistical architecture prior to execution.
 {: .objectives }
 
@@ -21,8 +23,6 @@ permalink: /labs/10/
 [Download lab09a-problem-solving-setup.Rmd]({{ '/rmd/lab09a-problem-solving-setup.Rmd' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})

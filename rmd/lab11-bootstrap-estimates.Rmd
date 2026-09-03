@@ -60,6 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Part 6: Extensions of the General Linear Model &nbsp;|&nbsp; **Week:** 13 &nbsp;|&nbsp; **Key deliverable:** Bootstrap loops (boot package)
 
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

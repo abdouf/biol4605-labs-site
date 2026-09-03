@@ -60,7 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Part 1: Quantitative Background &nbsp;|&nbsp; **Week:** 1 &nbsp;|&nbsp; **Key deliverable:** Manual data collection worksheet
 
-> **Note:** Held in the Carter Andrews room.
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

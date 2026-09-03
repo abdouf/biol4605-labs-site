@@ -60,6 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Part 2: Quantifying Uncertainty &nbsp;|&nbsp; **Week:** 3 &nbsp;|&nbsp; **Key deliverable:** Worked p-value calculations
 
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

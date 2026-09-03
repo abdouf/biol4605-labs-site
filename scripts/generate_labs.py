@@ -39,7 +39,7 @@ def load_labs():
 
 def render_rmd(template_text: str, lab: dict) -> str:
     note = lab.get("note") or ""
-    note_block = f"> **Note:** {note}\n" if note.strip() else ""
+    note_block = f"> {note}\n" if note.strip() else ""
     replacements = {
         "{{WEEK}}": str(lab["week"]),
         "{{LAB_LABEL}}": lab["lab_label"],
@@ -79,9 +79,7 @@ permalink: /labs/??WEEK_PADDED??/
 [Download ??RMD_BASENAME??]({{ '/??RMD_FILE??' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})
 """
@@ -89,7 +87,7 @@ editing. This file is generated from
 
 def render_lab_page(lab: dict) -> str:
     week_padded = lab.get("week_padded") or f"{lab['week']:02d}"
-    note_line = f"\n**Note:** {lab['note']}\n" if lab.get("note") else ""
+    note_line = f"\n{lab['note']}\n"
     replacements = {
         "??WEEK_PADDED??": week_padded,
         "??WEEK??": str(lab["week"]),

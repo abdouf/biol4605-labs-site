@@ -10,6 +10,8 @@ permalink: /labs/13/
 
 **Module:** Part 6: Extensions of the General Linear Model
 
+Location: CSF BIOL 2218B Computer Lab
+
 > Resampling for confidence intervals. Empirical estimation of standard errors and non-parametric interval estimation.
 {: .objectives }
 
@@ -21,8 +23,6 @@ permalink: /labs/13/
 [Download lab11-bootstrap-estimates.Rmd]({{ '/rmd/lab11-bootstrap-estimates.Rmd' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})

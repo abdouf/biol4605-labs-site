@@ -60,6 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Part 3: The General Linear Model – Single Explanatory Variable &nbsp;|&nbsp; **Week:** 6 &nbsp;|&nbsp; **Key deliverable:** Resampling scripts & visual overlays
 
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

@@ -10,6 +10,8 @@ permalink: /labs/02/
 
 **Module:** Part 1: Quantitative Background
 
+Location: CSF BIOL 2218B Computer Lab
+
 > Translating biological concepts into mathematical models. Defining response variables, parameters, and error structure.
 {: .objectives }
 
@@ -21,8 +23,6 @@ permalink: /labs/02/
 [Download lab02-equations.Rmd]({{ '/rmd/lab02-equations.Rmd' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})

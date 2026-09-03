@@ -60,6 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Parts 3–5: Applied Integration &nbsp;|&nbsp; **Week:** 11 &nbsp;|&nbsp; **Key deliverable:** Complete R script / R Markdown report
 
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

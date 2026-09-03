@@ -10,6 +10,8 @@ permalink: /labs/08/
 
 **Module:** Part 4: The General Linear Model – Multiple Explanatory Variables
 
+Location: CSF BIOL 2218B Computer Lab
+
 > Factorial designs & interactions. Main effects, interaction terms, and visual interpretation of non-additive biological responses.
 {: .objectives }
 
@@ -21,8 +23,6 @@ permalink: /labs/08/
 [Download lab07-glm-multifactor-anova.Rmd]({{ '/rmd/lab07-glm-multifactor-anova.Rmd' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})

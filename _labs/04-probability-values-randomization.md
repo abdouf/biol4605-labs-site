@@ -10,6 +10,8 @@ permalink: /labs/04/
 
 **Module:** Part 2: Quantifying Uncertainty
 
+Location: CSF BIOL 2218B Computer Lab
+
 > Non-parametric / permutation tests. Empirical p-value computation via Monte Carlo reshuffling of observational data.
 {: .objectives }
 
@@ -21,8 +23,6 @@ permalink: /labs/04/
 [Download lab04-probability-values-randomization.Rmd]({{ '/rmd/lab04-probability-values-randomization.Rmd' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})

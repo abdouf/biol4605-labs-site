@@ -60,6 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Part 4: The General Linear Model – Multiple Explanatory Variables &nbsp;|&nbsp; **Week:** 8 &nbsp;|&nbsp; **Key deliverable:** Two-way ANOVA & interaction plots
 
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

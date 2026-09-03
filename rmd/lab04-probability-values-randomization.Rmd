@@ -60,6 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Part 2: Quantifying Uncertainty &nbsp;|&nbsp; **Week:** 4 &nbsp;|&nbsp; **Key deliverable:** Custom simulation loops in R
 
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

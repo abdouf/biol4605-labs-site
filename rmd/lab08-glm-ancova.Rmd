@@ -60,6 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Part 4: The General Linear Model – Multiple Explanatory Variables &nbsp;|&nbsp; **Week:** 9 &nbsp;|&nbsp; **Key deliverable:** Homogeneity-of-slopes test & ANCOVA summary
 
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

@@ -60,6 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Part 1: Quantitative Background &nbsp;|&nbsp; **Week:** 2 &nbsp;|&nbsp; **Key deliverable:** LaTeX / math notation in R Markdown
 
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

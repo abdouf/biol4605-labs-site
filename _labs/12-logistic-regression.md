@@ -10,6 +10,8 @@ permalink: /labs/12/
 
 **Module:** Part 5: The Generalized Linear Model
 
+Location: CSF BIOL 2218B Computer Lab
+
 > Non-Gaussian response variables. Modeling binary/proportional biological outcomes using logit link functions.
 {: .objectives }
 
@@ -21,8 +23,6 @@ permalink: /labs/12/
 [Download lab10-logistic-regression.Rmd]({{ '/rmd/lab10-logistic-regression.Rmd' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})

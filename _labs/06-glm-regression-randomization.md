@@ -10,6 +10,8 @@ permalink: /labs/06/
 
 **Module:** Part 3: The General Linear Model – Single Explanatory Variable
 
+Location: CSF BIOL 2218B Computer Lab
+
 > Model verification via randomization. Testing slope null hypotheses through empirical null distribution creation.
 {: .objectives }
 
@@ -21,8 +23,6 @@ permalink: /labs/06/
 [Download lab05b-glm-regression-randomization.Rmd]({{ '/rmd/lab05b-glm-regression-randomization.Rmd' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})

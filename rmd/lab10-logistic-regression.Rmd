@@ -60,6 +60,7 @@ By the end of this lab, you should be able to:
 
 **Module:** Part 5: The Generalized Linear Model &nbsp;|&nbsp; **Week:** 12 &nbsp;|&nbsp; **Key deliverable:** Fitted logistic model with interpretation
 
+> Location: CSF BIOL 2218B Computer Lab
 
 
 ## Background

@@ -10,6 +10,8 @@ permalink: /labs/03/
 
 **Module:** Part 2: Quantifying Uncertainty
 
+Location: CSF BIOL 2218B Computer Lab
+
 > Parametric statistical distributions. Calculating p-values using continuous and discrete theoretical distributions (t, F, chi-squared, Normal).
 {: .objectives }
 
@@ -21,8 +23,6 @@ permalink: /labs/03/
 [Download lab03-probability-values-distributions.Rmd]({{ '/rmd/lab03-probability-values-distributions.Rmd' | relative_url }}){: .btn .btn-blue }
 
 Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
-editing. This file is generated from
-[`templates/lab_template.Rmd`]({{ '/templates/lab_template.Rmd' | relative_url }})
--- structure and section headings are standardized across all 13 labs.
+editing.
 
 [Back to schedule]({{ '/schedule/' | relative_url }})
