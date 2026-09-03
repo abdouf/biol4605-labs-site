@@ -1,0 +1,189 @@
+# ---------------------------------------------------------------------------
+# Structured lab schedule for BIOL/OCSC 4605 · 7220.
+# Single source of truth: schedule.md and every labs/labNN.md page render
+# from this file via Liquid, so edit dates/content here rather than in the
+# generated pages directly.
+#
+# `module` field wording is checked against the Part titles on David C.
+# Schneider's course site (https://davidcschneider.github.io/StatisticalScience/):
+# Part 1 Quantitative Background, Part 2 Quantifying Uncertainty, Part 3 The
+# General Linear Model - Single Explanatory Variable, Part 4 The General
+# Linear Model - Multiple Explanatory Variables, Part 5 The Generalized
+# Linear Model, Part 6 Extensions of the General Linear Model. Weeks 10-11
+# ("Parts 3-5: Applied Integration") are this course's own synthesis lab, not
+# a literal part title from that site.
+#
+# Fields:
+#   week          - integer, 1-13
+#   week_padded   - zero-padded string version of week ("01".."13"), used for
+#                   building /labs/NN/ URLs in Liquid (kept as plain data
+#                   rather than computed with a Liquid filter, since Liquid
+#                   has no built-in sprintf-style zero-pad filter)
+#   lab_label     - the "Lab N" designation used in the syllabus (labs 5 and
+#                   9 are split across two weeks as 5a/5b and 9a/9b)
+#   title         - short lab title (without the "Lab N:" prefix)
+#   slug          - kebab-case identifier, used for filenames
+#   module        - lecture/part mapping
+#   focus         - primary focus & learning objectives
+#   deliverable   - key deliverable(s)
+#   software      - key software / functions used
+#   rmd_file      - path to the downloadable R Markdown starter, relative to
+#                   the repo root
+#   note          - optional logistical note (room, format, etc.)
+# ---------------------------------------------------------------------------
+labs:
+  - week: 1
+    week_padded: "01"
+    lab_label: "Lab 1"
+    title: "Inferential Cards"
+    slug: "inferential-cards"
+    module: "Part 1: Quantitative Background"
+    focus: "Hands-on sampling & statistical inference. Understanding variability, hypothesis testing, and standard errors using physical playing cards."
+    deliverable: "Manual data collection worksheet"
+    software: "None (physical cards; worksheet only)"
+    rmd_file: "rmd/lab01-inferential-cards.Rmd"
+    note: "Held in the Carter Andrews room."
+
+  - week: 2
+    week_padded: "02"
+    lab_label: "Lab 2"
+    title: "Equations"
+    slug: "equations"
+    module: "Part 1: Quantitative Background"
+    focus: "Translating biological concepts into mathematical models. Defining response variables, parameters, and error structure."
+    deliverable: "LaTeX / math notation in R Markdown"
+    software: "R Markdown + LaTeX math syntax"
+    rmd_file: "rmd/lab02-equations.Rmd"
+    note: ""
+
+  - week: 3
+    week_padded: "03"
+    lab_label: "Lab 3"
+    title: "Probability Values from Distribution Functions"
+    slug: "probability-values-distributions"
+    module: "Part 2: Quantifying Uncertainty"
+    focus: "Parametric statistical distributions. Calculating p-values using continuous and discrete theoretical distributions (t, F, chi-squared, Normal)."
+    deliverable: "Worked p-value calculations"
+    software: "Base R distribution functions (pnorm, pt, pf)"
+    rmd_file: "rmd/lab03-probability-values-distributions.Rmd"
+    note: ""
+
+  - week: 4
+    week_padded: "04"
+    lab_label: "Lab 4"
+    title: "Probability Values by Randomization"
+    slug: "probability-values-randomization"
+    module: "Part 2: Quantifying Uncertainty"
+    focus: "Non-parametric / permutation tests. Empirical p-value computation via Monte Carlo reshuffling of observational data."
+    deliverable: "Custom simulation loops in R"
+    software: "Base R (for/replicate loops); no external package required"
+    rmd_file: "rmd/lab04-probability-values-randomization.Rmd"
+    note: ""
+
+  - week: 5
+    week_padded: "05"
+    lab_label: "Lab 5a"
+    title: "GLM – Simple Regression"
+    slug: "glm-simple-regression"
+    module: "Part 3: The General Linear Model – Single Explanatory Variable"
+    focus: "Fitting simple linear models. Model formulation (Y = b0 + b1*X + e), parameter estimation, and residual diagnostic plots."
+    deliverable: "Annotated lm() output and diagnostic plots"
+    software: "lm(), summary(), plot() in R"
+    rmd_file: "rmd/lab05a-glm-simple-regression.Rmd"
+    note: ""
+
+  - week: 6
+    week_padded: "06"
+    lab_label: "Lab 5b"
+    title: "GLM – Regression with Randomization"
+    slug: "glm-regression-randomization"
+    module: "Part 3: The General Linear Model – Single Explanatory Variable"
+    focus: "Model verification via randomization. Testing slope null hypotheses through empirical null distribution creation."
+    deliverable: "Resampling scripts & visual overlays"
+    software: "Base R resampling + ggplot2 overlays"
+    rmd_file: "rmd/lab05b-glm-regression-randomization.Rmd"
+    note: ""
+
+  - week: 7
+    week_padded: "07"
+    lab_label: "Lab 6a/b"
+    title: "GLM – Single Factor ANOVA"
+    slug: "glm-single-factor-anova"
+    module: "Part 3: The General Linear Model – Single Explanatory Variable"
+    focus: "Group comparison models. Factor coding, sum of squares decomposition, variance partitioning, and post-hoc contrasts."
+    deliverable: "ANOVA table with post-hoc contrasts"
+    software: "lm(), anova(), emmeans package"
+    rmd_file: "rmd/lab06-glm-single-factor-anova.Rmd"
+    note: ""
+
+  - week: 8
+    week_padded: "08"
+    lab_label: "Lab 7"
+    title: "GLM – Multifactor ANOVA"
+    slug: "glm-multifactor-anova"
+    module: "Part 4: The General Linear Model – Multiple Explanatory Variables"
+    focus: "Factorial designs & interactions. Main effects, interaction terms, and visual interpretation of non-additive biological responses."
+    deliverable: "Two-way ANOVA & interaction plots"
+    software: "lm(), anova(), interaction.plot() / ggplot2"
+    rmd_file: "rmd/lab07-glm-multifactor-anova.Rmd"
+    note: ""
+
+  - week: 9
+    week_padded: "09"
+    lab_label: "Lab 8"
+    title: "GLM – ANCOVA"
+    slug: "glm-ancova"
+    module: "Part 4: The General Linear Model – Multiple Explanatory Variables"
+    focus: "Analysis of covariance. Combining continuous covariates with categorical predictors to control for background noise."
+    deliverable: "Homogeneity-of-slopes test & ANCOVA summary"
+    software: "lm(), anova(), car package"
+    rmd_file: "rmd/lab08-glm-ancova.Rmd"
+    note: ""
+
+  - week: 10
+    week_padded: "10"
+    lab_label: "Lab 9a"
+    title: "Problem-Solving with GLM (Setup)"
+    slug: "problem-solving-setup"
+    module: "Parts 3–5: Applied Integration"
+    focus: "Experimental setup & data structuring. Formulating research questions into verifiable statistical architecture prior to execution."
+    deliverable: "Model structure & DAGs / worksheets"
+    software: "R Markdown planning worksheet (no analysis code yet)"
+    rmd_file: "rmd/lab09a-problem-solving-setup.Rmd"
+    note: ""
+
+  - week: 11
+    week_padded: "11"
+    lab_label: "Lab 9b"
+    title: "Problem-Solving with GLM (Execution)"
+    slug: "problem-solving-execution"
+    module: "Parts 3–5: Applied Integration"
+    focus: "Full analytical pipeline. Data cleaning, model fitting, model selection, diagnostic checking, and biological interpretation."
+    deliverable: "Complete R script / R Markdown report"
+    software: "Full tidyverse + lm()/glm() pipeline"
+    rmd_file: "rmd/lab09b-problem-solving-execution.Rmd"
+    note: ""
+
+  - week: 12
+    week_padded: "12"
+    lab_label: "Lab 10"
+    title: "Logistic Regression (GLM)"
+    slug: "logistic-regression"
+    module: "Part 5: The Generalized Linear Model"
+    focus: "Non-Gaussian response variables. Modeling binary/proportional biological outcomes using logit link functions."
+    deliverable: "Fitted logistic model with interpretation"
+    software: "glm(family = binomial)"
+    rmd_file: "rmd/lab10-logistic-regression.Rmd"
+    note: ""
+
+  - week: 13
+    week_padded: "13"
+    lab_label: "Lab 11"
+    title: "Bootstrap Estimates"
+    slug: "bootstrap-estimates"
+    module: "Part 6: Extensions of the General Linear Model"
+    focus: "Resampling for confidence intervals. Empirical estimation of standard errors and non-parametric interval estimation."
+    deliverable: "Bootstrap loops (boot package)"
+    software: "boot package"
+    rmd_file: "rmd/lab11-bootstrap-estimates.Rmd"
+    note: ""

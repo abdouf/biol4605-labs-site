@@ -1,0 +1,23 @@
+# Jekyll
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+.bundle/
+vendor/
+
+# R / RStudio
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Knitted lab output (students/TAs render locally; keep source .Rmd only)
+rmd/*.html
+rmd/*_cache/
+rmd/*_files/
+
+# OS cruft
+.DS_Store
+Thumbs.db

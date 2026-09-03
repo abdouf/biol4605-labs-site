@@ -1,0 +1,101 @@
+# ---------------------------------------------------------------------------
+# Site configuration — BIOL/OCSC 4605 / BIOL 7220
+# Statistical Analysis in Biology and Environmental Science
+# ---------------------------------------------------------------------------
+# EDIT ME FIRST:
+#   - title / description below
+#   - url + baseurl (baseurl must match your repo name exactly, incl. case)
+#   - github/repository_url under aux_links
+# ---------------------------------------------------------------------------
+
+title: "BIOL/OCSC 4605 · 7220"
+description: "Statistical Analysis in Biology and Environmental Science — lab course site"
+tagline: "Statistical Analysis in Biology and Environmental Science"
+
+# --- GitHub Pages project-site settings -------------------------------------
+# If this repo is published at https://<user>.github.io/<repo>/, set:
+#   url:      "https://<user>.github.io"
+#   baseurl:  "/<repo>"
+# If this repo IS the <user>.github.io user/org site, set baseurl: ""
+url: "https://abdouf.github.io"
+baseurl: "/biol4605-labs-site"
+
+# --- Theme: Just the Docs ---------------------------------------------------
+# Built via GitHub Actions (see .github/workflows/pages.yml), so remote_theme
+# works even though it isn't on GitHub Pages' short list of supported themes.
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# --- Just the Docs options ---------------------------------------------------
+color_scheme: light
+search_enabled: true
+nav_sort: case_insensitive          # comment out to sort by nav_order only
+heading_anchors: true
+back_to_top: true
+back_to_top_text: "Back to top"
+
+aux_links:
+  "Course repo on GitHub":
+    - "https://github.com/abdouf/biol4605-labs-site"
+  "Lectures (Dr. Hurford)":
+    - "https://ahurford.github.io/biol-4605-f26/"
+  "Curriculum reference (Dr. Schneider)":
+    - "https://davidcschneider.github.io/StatisticalScience/"
+aux_links_new_tab: true
+
+footer_content: "BIOL/OCSC 4605 · 7220 — Statistical Analysis in Biology and Environmental Science. Labs on this site; lectures delivered by Dr. Amy Hurford. Curriculum originally developed by Dr. D. C. Schneider (<em>Statistical Science</em>), kept there for reference."
+
+callouts:
+  objectives:
+    title: "Learning objectives"
+    color: blue
+  deliverable:
+    title: "Deliverable"
+    color: green
+  note:
+    title: "Note"
+    color: yellow
+
+# --- Collections -------------------------------------------------------------
+collections:
+  labs:
+    output: true
+    permalink: /labs/:path/
+
+defaults:
+  - scope:
+      path: ""
+      type: "labs"
+    values:
+      layout: default
+      parent: Labs
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+# --- Build exclusions --------------------------------------------------------
+# rmd/ and templates/ are EXCLUDED from Jekyll's own processing on purpose:
+# every .Rmd file has its own YAML front matter (needed for knitr/RStudio),
+# and Jekyll treats ANY file starting with "---" as a page to run through
+# Liquid + the site layout, front matter and all -- which both mangles the
+# .Rmd (stripping its real front matter, wrapping it in site HTML) and can
+# crash the build (jekyll-seo-tag chokes on the `` `r format(Sys.Date(),...)` ``
+# date field, which isn't a valid Ruby datetime). Excluding them here keeps
+# them untouched; the GitHub Actions workflow copies them into _site/ as
+# plain files in a separate step AFTER `jekyll build` runs, so download
+# links from the lab pages still work.
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor/
+  - node_modules/
+  - "*.Rproj"
+  - .Rproj.user/
+  - rmd/
+  - templates/
+  - scripts/

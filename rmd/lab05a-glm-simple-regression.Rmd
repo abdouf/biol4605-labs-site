@@ -1,0 +1,149 @@
+---
+title: "Lab 5a: GLM – Simple Regression"
+subtitle: "BIOL/OCSC 4605 · 7220 --- Statistical Analysis in Biology and Environmental Science"
+author: "Student Name (replace)"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+    code_folding: show
+    theme: flatly
+    css: ../assets/css/course.css
+    self_contained: true
+params:
+  week: 5
+  module: "Part 3: The General Linear Model – Single Explanatory Variable"
+  due_date: "YYYY-MM-DD"
+---
+
+<!--
+  ============================================================================
+  STANDARD LAB TEMPLATE — BIOL/OCSC 4605 · 7220
+  ============================================================================
+  This file was generated from templates/lab_template.Rmd. Keep the section
+  structure and YAML options consistent across labs so students always know
+  where to look. Replace every "(edit me)" / placeholder comment before
+  distributing this lab.
+
+  To regenerate ALL 13 labs from an updated version of this template, edit
+  templates/lab_template.Rmd and re-run the generator script described in the
+  repo README, then re-apply any lab-specific edits you had made.
+  ============================================================================
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE, message = FALSE, warning = FALSE,
+  fig.width = 6, fig.height = 4
+)
+
+# Packages used in this lab -- uncomment / extend as needed.
+# library(tidyverse)
+# library(emmeans)
+# library(car)
+# library(boot)
+
+set.seed(4605) # reproducible randomization / bootstrap results across labs
+```
+
+## Learning objectives
+
+> Fitting simple linear models. Model formulation (Y = b0 + b1*X + e), parameter estimation, and residual diagnostic plots.
+
+By the end of this lab, you should be able to:
+
+1. *(objective 1 --- edit me)*
+2. *(objective 2 --- edit me)*
+3. *(objective 3 --- edit me)*
+
+**Module:** Part 3: The General Linear Model – Single Explanatory Variable &nbsp;|&nbsp; **Week:** 5 &nbsp;|&nbsp; **Key deliverable:** Annotated lm() output and diagnostic plots
+
+
+
+## Background
+
+*(One to two paragraphs of conceptual background specific to this lab. Link
+back to the relevant section of Schneider's*
+[*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/)*.)*
+
+## Data
+
+*(Describe or load the dataset used this week. Replace the placeholder code
+below with the actual read-in step, or remove it if this lab has no dataset,
+e.g. Lab 1's physical-cards exercise.)*
+
+```{r load-data}
+# df <- read.csv(here::here("data", "FILENAME.csv"))
+# str(df)
+```
+
+## Guided walkthrough
+
+### Step 1 --- *(edit me)*
+
+```{r step-1}
+
+```
+
+### Step 2 --- *(edit me)*
+
+```{r step-2}
+
+```
+
+### Step 3 --- *(edit me)*
+
+```{r step-3}
+
+```
+
+## Diagnostics / verification
+
+*(Residual plots, randomization overlays, homogeneity checks, or other
+verification appropriate to this lab's method. Primary tools this week:*
+`lm(), summary(), plot() in R`*.)*
+
+```{r diagnostics}
+
+```
+
+## Exercises
+
+Work through the following and show your code and output for each.
+
+1. *(exercise 1 --- edit me)*
+2. *(exercise 2 --- edit me)*
+3. *(exercise 3 --- edit me)*
+
+## Submission questions
+
+Answer in complete sentences below each question. These responses, together
+with your code above, are graded against this lab's key deliverable:
+**Annotated lm() output and diagnostic plots**.
+
+**Q1.** *(question --- edit me)*
+
+> *(your answer here)*
+
+**Q2.** *(question --- edit me)*
+
+> *(your answer here)*
+
+**Q3.** *(question --- edit me)*
+
+> *(your answer here)*
+
+## Submission checklist
+
+- [ ] Code chunks all run top-to-bottom without error (Knit ▸ Knit to HTML)
+- [ ] All placeholder text above has been replaced
+- [ ] Submission questions answered in full sentences
+- [ ] File renamed / submitted per course LMS instructions
+
+---
+
+```{r session-info}
+sessionInfo()
+```

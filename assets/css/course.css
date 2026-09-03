@@ -1,0 +1,36 @@
+/* Shared styling knit into every lab's HTML output (linked via each Rmd's
+   YAML `css:` field). Keep this lightweight -- it augments the base
+   html_document theme, it doesn't replace it. */
+
+body {
+  max-width: 960px;
+}
+
+h1.title {
+  border-bottom: 3px solid #2c3e50;
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  color: #2c3e50;
+  border-bottom: 1px solid #dfe2e5;
+  padding-bottom: 0.2em;
+  margin-top: 1.6em;
+}
+
+blockquote {
+  border-left: 4px solid #2c3e50;
+  background: #f6f8fa;
+  padding: 0.6em 1em;
+  color: #333;
+}
+
+/* Submission checklist readability */
+ul li input[type="checkbox"] {
+  margin-right: 0.5em;
+}
+
+code {
+  color: #c7254e;
+  background-color: #f9f2f4;
+}
