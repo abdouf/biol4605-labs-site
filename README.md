@@ -1,10 +1,6 @@
 # BIOL/OCSC 4605 · 7220 — Course Site & Lab Templates
 
 Starter GitHub Pages site + standardized R Markdown lab template for
-<<<<<<< HEAD
-**Statistical Analysis in Biology and Environmental Science**, structured
-around Dr. A. Hurford [*Statistical Analysis in Biology and Environmental Science*] lecture syllabus. Both the Labs and the Lectures are built around Dr. D. C. Schneider's curriculum [*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/)
-=======
 **Statistical Analysis in Biology and Environmental Science** (BIOL/OCSC 4605 · 7220).
 This repo builds the **Labs** portion of the course; lectures for the current
 offering are delivered separately by Dr. Amy Hurford
@@ -12,7 +8,6 @@ offering are delivered separately by Dr. Amy Hurford
 and the lectures are built around Dr. David C. Schneider's original
 curriculum, [*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/),
 kept there for reference.
->>>>>>> 6b0c2f6 (Fix broken links, remove duplicate deploy workflow, reconcile attribution)
 
 Built with [Jekyll](https://jekyllrb.com/) + [Just the Docs](https://just-the-docs.com/),
 deployed via GitHub Actions so it works on any GitHub repo without needing to
@@ -37,7 +32,6 @@ be on GitHub Pages' restricted theme list.
 ├── assets/css/course.css      # shared CSS knit into every lab's HTML output
 └── scripts/generate_labs.py   # regenerates _labs/ and rmd/ from the template + data
 ```
-
 
 ## 1. Working with the lab schedule and templates
 
@@ -85,15 +79,10 @@ TAs to fill in against your real course material.
 
 ## 3. Attribution
 
-<<<<<<< HEAD
-Curriculum structure and part sequencing follow David C. Schneider,
-[*Statistical Analysis in Biology and Environmental Science*](https://davidcschneider.github.io/StatisticalScience/).
-=======
 Curriculum structure and part sequencing originate from Dr. David C.
 Schneider's course site, [*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/)
 (*Statistical Analysis in Biology and Environmental Science*, BIOL/OCSC
-4605 · 7220) — kept here for reference, not the current course site.
+4605 · 7220), kept here for reference, not the current course site.
 Lectures for the current offering are delivered by Dr. Amy Hurford
 ([lecture notes](https://ahurford.github.io/biol-4605-f26/)); this repo
 covers the labs.
->>>>>>> 6b0c2f6 (Fix broken links, remove duplicate deploy workflow, reconcile attribution)

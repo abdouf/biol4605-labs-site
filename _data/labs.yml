@@ -16,9 +16,8 @@
 # Fields:
 #   week          - integer, 1-13
 #   week_padded   - zero-padded string version of week ("01".."13"), used for
-#                   building /labs/NN/ URLs in Liquid (kept as plain data
-#                   rather than computed with a Liquid filter, since Liquid
-#                   has no built-in sprintf-style zero-pad filter)
+#                   building /labs/NN/ URLs in Liquid
+#   date          - exact date of the lab (Fall 2026 Tuesdays)
 #   lab_label     - the "Lab N" designation used in the syllabus (labs 5 and
 #                   9 are split across two weeks as 5a/5b and 9a/9b)
 #   title         - short lab title (without the "Lab N:" prefix)
@@ -34,6 +33,7 @@
 labs:
   - week: 1
     week_padded: "01"
+    date: "Sept 8, 2026"
     lab_label: "Lab 1"
     title: "Inferential Cards"
     slug: "inferential-cards"
@@ -46,6 +46,7 @@ labs:
 
   - week: 2
     week_padded: "02"
+    date: "Sept 15, 2026"
     lab_label: "Lab 2"
     title: "Equations"
     slug: "equations"
@@ -58,6 +59,7 @@ labs:
 
   - week: 3
     week_padded: "03"
+    date: "Sept 22, 2026"
     lab_label: "Lab 3"
     title: "Probability Values from Distribution Functions"
     slug: "probability-values-distributions"
@@ -70,6 +72,7 @@ labs:
 
   - week: 4
     week_padded: "04"
+    date: "Sept 29, 2026"
     lab_label: "Lab 4"
     title: "Probability Values by Randomization"
     slug: "probability-values-randomization"
@@ -82,6 +85,7 @@ labs:
 
   - week: 5
     week_padded: "05"
+    date: "Oct 6, 2026"
     lab_label: "Lab 5a"
     title: "GLM – Simple Regression"
     slug: "glm-simple-regression"
@@ -94,6 +98,7 @@ labs:
 
   - week: 6
     week_padded: "06"
+    date: "Oct 13, 2026"
     lab_label: "Lab 5b"
     title: "GLM – Regression with Randomization"
     slug: "glm-regression-randomization"
@@ -106,6 +111,7 @@ labs:
 
   - week: 7
     week_padded: "07"
+    date: "Oct 20, 2026"
     lab_label: "Lab 6a/b"
     title: "GLM – Single Factor ANOVA"
     slug: "glm-single-factor-anova"
@@ -118,6 +124,7 @@ labs:
 
   - week: 8
     week_padded: "08"
+    date: "Oct 27, 2026"
     lab_label: "Lab 7"
     title: "GLM – Multifactor ANOVA"
     slug: "glm-multifactor-anova"
@@ -130,6 +137,7 @@ labs:
 
   - week: 9
     week_padded: "09"
+    date: "Nov 3, 2026"
     lab_label: "Lab 8"
     title: "GLM – ANCOVA"
     slug: "glm-ancova"
@@ -142,6 +150,7 @@ labs:
 
   - week: 10
     week_padded: "10"
+    date: "Nov 10, 2026"
     lab_label: "Lab 9a"
     title: "Problem-Solving with GLM (Setup)"
     slug: "problem-solving-setup"
@@ -154,6 +163,7 @@ labs:
 
   - week: 11
     week_padded: "11"
+    date: "Nov 17, 2026"
     lab_label: "Lab 9b"
     title: "Problem-Solving with GLM (Execution)"
     slug: "problem-solving-execution"
@@ -166,6 +176,7 @@ labs:
 
   - week: 12
     week_padded: "12"
+    date: "Nov 24, 2026"
     lab_label: "Lab 10"
     title: "Logistic Regression (GLM)"
     slug: "logistic-regression"
@@ -178,6 +189,7 @@ labs:
 
   - week: 13
     week_padded: "13"
+    date: "Dec 1, 2026"
     lab_label: "Lab 11"
     title: "Bootstrap Estimates"
     slug: "bootstrap-estimates"
