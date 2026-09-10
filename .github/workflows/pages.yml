@@ -36,18 +36,29 @@ jobs:
         env:
           JEKYLL_ENV: production
 
-      - name: Copy raw R Markdown files (excluded from Jekyll processing)
+      - name: Copy templates (excluded from Jekyll processing)
         run: |
-          mkdir -p _site/rmd _site/templates
-          cp -r rmd/. _site/rmd/
+          mkdir -p _site/templates
           cp -r templates/. _site/templates/
 
-      - name: Verify rmd files were actually copied
+      - name: Copy only released lab R Markdown files
+        run: ruby scripts/copy_released_rmd.rb
+
+      - name: Verify released/withheld rmd files match _data/labs.yml
         run: |
-          test -f _site/rmd/lab01-inferential-cards.Rmd || {
-            echo "::error::rmd/ was not copied into _site/ -- Download links will 404"
-            exit 1
-          }
+          ruby -ryaml -e '
+            labs = YAML.load_file("_data/labs.yml")["labs"]
+            bad = labs.select do |lab|
+              path = File.join("_site", lab["rmd_file"])
+              lab["downloadable"] ? !File.exist?(path) : File.exist?(path)
+            end
+            unless bad.empty?
+              bad.each { |l| puts "::error::#{l["rmd_file"]} (downloadable=#{l["downloadable"]}) is wrong in _site/" }
+              exit 1
+            end
+            released = labs.count { |l| l["downloadable"] }
+            puts "OK: #{released} released, #{labs.size - released} correctly withheld."
+          '
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

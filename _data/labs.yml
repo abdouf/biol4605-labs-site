@@ -42,7 +42,8 @@ labs:
     deliverable: "Manual data collection worksheet"
     software: "None (physical cards; worksheet only)"
     rmd_file: "rmd/lab01-inferential-cards.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 2
     week_padded: "02"
@@ -55,7 +56,8 @@ labs:
     deliverable: "LaTeX / math notation in R Markdown"
     software: "R Markdown + LaTeX math syntax"
     rmd_file: "rmd/lab02-equations.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 3
     week_padded: "03"
@@ -68,7 +70,8 @@ labs:
     deliverable: "Worked p-value calculations"
     software: "Base R distribution functions (pnorm, pt, pf)"
     rmd_file: "rmd/lab03-probability-values-distributions.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 4
     week_padded: "04"
@@ -81,7 +84,8 @@ labs:
     deliverable: "Custom simulation loops in R"
     software: "Base R (for/replicate loops); no external package required"
     rmd_file: "rmd/lab04-probability-values-randomization.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 5
     week_padded: "05"
@@ -94,7 +98,8 @@ labs:
     deliverable: "Annotated lm() output and diagnostic plots"
     software: "lm(), summary(), plot() in R"
     rmd_file: "rmd/lab05a-glm-simple-regression.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 6
     week_padded: "06"
@@ -107,7 +112,8 @@ labs:
     deliverable: "Resampling scripts & visual overlays"
     software: "Base R resampling + ggplot2 overlays"
     rmd_file: "rmd/lab05b-glm-regression-randomization.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 7
     week_padded: "07"
@@ -120,7 +126,8 @@ labs:
     deliverable: "ANOVA table with post-hoc contrasts"
     software: "lm(), anova(), emmeans package"
     rmd_file: "rmd/lab06-glm-single-factor-anova.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 8
     week_padded: "08"
@@ -133,7 +140,8 @@ labs:
     deliverable: "Two-way ANOVA & interaction plots"
     software: "lm(), anova(), interaction.plot() / ggplot2"
     rmd_file: "rmd/lab07-glm-multifactor-anova.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 9
     week_padded: "09"
@@ -146,7 +154,8 @@ labs:
     deliverable: "Homogeneity-of-slopes test & ANCOVA summary"
     software: "lm(), anova(), car package"
     rmd_file: "rmd/lab08-glm-ancova.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 10
     week_padded: "10"
@@ -159,7 +168,8 @@ labs:
     deliverable: "Model structure & DAGs / worksheets"
     software: "R Markdown planning worksheet (no analysis code yet)"
     rmd_file: "rmd/lab09a-problem-solving-setup.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 11
     week_padded: "11"
@@ -172,7 +182,8 @@ labs:
     deliverable: "Complete R script / R Markdown report"
     software: "Full tidyverse + lm()/glm() pipeline"
     rmd_file: "rmd/lab09b-problem-solving-execution.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 12
     week_padded: "12"
@@ -185,7 +196,8 @@ labs:
     deliverable: "Fitted logistic model with interpretation"
     software: "glm(family = binomial)"
     rmd_file: "rmd/lab10-logistic-regression.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
 
   - week: 13
     week_padded: "13"
@@ -198,4 +210,5 @@ labs:
     deliverable: "Bootstrap loops (boot package)"
     software: "boot package"
     rmd_file: "rmd/lab11-bootstrap-estimates.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab"
+    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
+    downloadable: false
