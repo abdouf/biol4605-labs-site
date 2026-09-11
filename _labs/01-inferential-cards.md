@@ -48,16 +48,4 @@ wording and full instructions your group will follow):
 **Materials to bring:** each group (group of 3 students) needs one standard deck of playing cards
 (52 cards; jokers can be set aside). A regular deck works fine
 
- ## Starter file
-
-+{% assign this_lab = site.data.labs.labs | where: "week", 1 | first %}
-+{% if this_lab.downloadable %}
- [Download lab01-inferential-cards.Rmd]({{ '/rmd/lab01-inferential-cards.Rmd' | relative_url }}){: .btn .btn-blue }
-
- Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
- editing.
-+{% else %}
-+_Materials for this lab will be posted here a few hours before the session._
-+{% endif %}
-
- [Back to schedule]({{ '/schedule/' | relative_url }})
+[Back to schedule]({{ '/schedule/' | relative_url }})
