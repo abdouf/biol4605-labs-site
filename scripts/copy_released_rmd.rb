@@ -1,10 +1,17 @@
 #!/usr/bin/env ruby
 # Copy only "released" lab .Rmd files into _site/rmd/ during the GitHub
-# Pages build. _data/labs.yml's `downloadable` flag controls this per week --
-# a lab marked false is left OUT of _site/ entirely, not just unlinked, so
-# there's no URL a student could guess or bookmark to get it early.
+# Pages build.
 #
-# Run from the repo root (that's what the workflow does):
+# _data/labs.yml's `downloadable` flag controls this per week. A lab marked
+# downloadable: false has its .Rmd file left OUT of _site/ entirely -- not
+# just unlinked from the page, genuinely absent from the published site --
+# so there's no URL a student could guess or bookmark to get it early.
+#
+# Uses only Ruby's standard library (yaml, fileutils) so it needs no extra
+# gems beyond what ruby/setup-ruby + bundler-cache already provide in the
+# workflow.
+#
+# Run from the repo root (that's what .github/workflows/pages.yml does):
 #   ruby scripts/copy_released_rmd.rb
 
 require "yaml"

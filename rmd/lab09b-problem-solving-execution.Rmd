@@ -13,7 +13,7 @@ output:
     css: ../assets/css/course.css
     self_contained: true
 params:
-  week: 11
+  week: 9
   module: "Parts 3–5: Applied Integration"
   due_date: "YYYY-MM-DD"
 ---
@@ -58,7 +58,7 @@ By the end of this lab, you should be able to:
 2. *(objective 2 --- edit me)*
 3. *(objective 3 --- edit me)*
 
-**Module:** Parts 3–5: Applied Integration &nbsp;|&nbsp; **Week:** 11 &nbsp;|&nbsp; **Key deliverable:** Complete R script / R Markdown report
+**Module:** Parts 3–5: Applied Integration &nbsp;|&nbsp; **Week:** 9 &nbsp;|&nbsp; **Key deliverable:** Complete R script / R Markdown report
 
 > Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 

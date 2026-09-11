@@ -4,18 +4,39 @@
 # from this file via Liquid, so edit dates/content here rather than in the
 # generated pages directly.
 #
+# 11-lab Fall 2026 schedule (revised from the original 13-lab set):
+# Labs 7 (Multifactor ANOVA), 8 (ANCOVA), and 11/Schneider's-numbering
+# (Bootstrap Estimates) were cut to fit a 10-session term. Their core
+# skills are still exercised elsewhere: multifactor/blocked-design GLM
+# specification is practiced in Lab 9a/9b's own datasets, and
+# resampling-based inference is already covered by Lab 4. `lab_label`
+# keeps each surviving lab's original Schneider numbering (Lab 1, 2, 3, 4,
+# 5a, 5b, 6a/b, 9a, 9b, 10) for traceability back to
+# https://davidcschneider.github.io/StatisticalScience/; `week` is this
+# course's own 1-11 session sequence, which is NOT the same as the
+# original lab number for 9a/9b/10 (see syllabus.md for the Part-to-week
+# mapping, which was rewritten to match).
+#
+# Week 11 ("Lab 11 (new)") is ORIGINAL content, not from Schneider's site
+# at all -- none of his 13 labs cover AIC/model selection. It was added to
+# align with Dr. Hurford's lecture schedule ("Model selection I" Nov 30,
+# "Multimodel inference -- AIC and SIC" Dec 2), landing the lab exactly
+# between those two lectures. It fills Part 6's slot, which otherwise has
+# no lab in this 10-core-lab schedule (see syllabus.md).
+#
 # `module` field wording is checked against the Part titles on David C.
 # Schneider's course site (https://davidcschneider.github.io/StatisticalScience/):
 # Part 1 Quantitative Background, Part 2 Quantifying Uncertainty, Part 3 The
 # General Linear Model - Single Explanatory Variable, Part 4 The General
 # Linear Model - Multiple Explanatory Variables, Part 5 The Generalized
-# Linear Model, Part 6 Extensions of the General Linear Model. Weeks 10-11
+# Linear Model, Part 6 Extensions of the General Linear Model. Weeks 8-9
 # ("Parts 3-5: Applied Integration") are this course's own synthesis lab, not
-# a literal part title from that site.
+# a literal part title from that site. Parts 4 and 6 have no dedicated lab
+# in this 10-lab schedule (see the note above).
 #
 # Fields:
-#   week          - integer, 1-13
-#   week_padded   - zero-padded string version of week ("01".."13"), used for
+#   week          - integer, 1-11
+#   week_padded   - zero-padded string version of week ("01".."11"), used for
 #                   building /labs/NN/ URLs in Liquid
 #   date          - exact date of the lab (Fall 2026 Tuesdays)
 #   lab_label     - the "Lab N" designation used in the syllabus (labs 5 and
@@ -28,12 +49,22 @@
 #   software      - key software / functions used
 #   rmd_file      - path to the downloadable R Markdown starter, relative to
 #                   the repo root
-#   note          - optional logistical note (room, format, etc.)
+#   note          - optional logistical note (room, time, format, etc.)
+#   downloadable  - true/false. Controls whether this week's Download button
+#                   appears on its lab page AND whether the .Rmd file is
+#                   published into _site/ at all during the GitHub Actions
+#                   build (scripts/copy_released_rmd.rb only copies files
+#                   for labs marked true, so an unreleased lab's file is
+#                   genuinely absent from the live site, not just unlinked).
+#                   Flip to true and push a few hours before that week's
+#                   session; no need to re-run generate_labs.py just for
+#                   this -- the lab page checks this flag at Jekyll build
+#                   time via Liquid.
 # ---------------------------------------------------------------------------
 labs:
   - week: 1
     week_padded: "01"
-    date: "Sept 8, 2026"
+    date: "Sept 15, 2026"
     lab_label: "Lab 1"
     title: "Inferential Cards"
     slug: "inferential-cards"
@@ -47,7 +78,7 @@ labs:
 
   - week: 2
     week_padded: "02"
-    date: "Sept 15, 2026"
+    date: "Sept 22, 2026"
     lab_label: "Lab 2"
     title: "Equations"
     slug: "equations"
@@ -61,7 +92,7 @@ labs:
 
   - week: 3
     week_padded: "03"
-    date: "Sept 22, 2026"
+    date: "Sept 29, 2026"
     lab_label: "Lab 3"
     title: "Probability Values from Distribution Functions"
     slug: "probability-values-distributions"
@@ -75,7 +106,7 @@ labs:
 
   - week: 4
     week_padded: "04"
-    date: "Sept 29, 2026"
+    date: "Oct 6, 2026"
     lab_label: "Lab 4"
     title: "Probability Values by Randomization"
     slug: "probability-values-randomization"
@@ -89,7 +120,7 @@ labs:
 
   - week: 5
     week_padded: "05"
-    date: "Oct 6, 2026"
+    date: "Oct 20, 2026"
     lab_label: "Lab 5a"
     title: "GLM – Simple Regression"
     slug: "glm-simple-regression"
@@ -103,7 +134,7 @@ labs:
 
   - week: 6
     week_padded: "06"
-    date: "Oct 13, 2026"
+    date: "Oct 27, 2026"
     lab_label: "Lab 5b"
     title: "GLM – Regression with Randomization"
     slug: "glm-regression-randomization"
@@ -117,7 +148,7 @@ labs:
 
   - week: 7
     week_padded: "07"
-    date: "Oct 20, 2026"
+    date: "Nov 3, 2026"
     lab_label: "Lab 6a/b"
     title: "GLM – Single Factor ANOVA"
     slug: "glm-single-factor-anova"
@@ -131,34 +162,6 @@ labs:
 
   - week: 8
     week_padded: "08"
-    date: "Oct 27, 2026"
-    lab_label: "Lab 7"
-    title: "GLM – Multifactor ANOVA"
-    slug: "glm-multifactor-anova"
-    module: "Part 4: The General Linear Model – Multiple Explanatory Variables"
-    focus: "Factorial designs & interactions. Main effects, interaction terms, and visual interpretation of non-additive biological responses."
-    deliverable: "Two-way ANOVA & interaction plots"
-    software: "lm(), anova(), interaction.plot() / ggplot2"
-    rmd_file: "rmd/lab07-glm-multifactor-anova.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
-
-  - week: 9
-    week_padded: "09"
-    date: "Nov 3, 2026"
-    lab_label: "Lab 8"
-    title: "GLM – ANCOVA"
-    slug: "glm-ancova"
-    module: "Part 4: The General Linear Model – Multiple Explanatory Variables"
-    focus: "Analysis of covariance. Combining continuous covariates with categorical predictors to control for background noise."
-    deliverable: "Homogeneity-of-slopes test & ANCOVA summary"
-    software: "lm(), anova(), car package"
-    rmd_file: "rmd/lab08-glm-ancova.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
-
-  - week: 10
-    week_padded: "10"
     date: "Nov 10, 2026"
     lab_label: "Lab 9a"
     title: "Problem-Solving with GLM (Setup)"
@@ -171,8 +174,8 @@ labs:
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
     downloadable: false
 
-  - week: 11
-    week_padded: "11"
+  - week: 9
+    week_padded: "09"
     date: "Nov 17, 2026"
     lab_label: "Lab 9b"
     title: "Problem-Solving with GLM (Execution)"
@@ -185,8 +188,8 @@ labs:
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
     downloadable: false
 
-  - week: 12
-    week_padded: "12"
+  - week: 10
+    week_padded: "10"
     date: "Nov 24, 2026"
     lab_label: "Lab 10"
     title: "Logistic Regression (GLM)"
@@ -199,16 +202,16 @@ labs:
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
     downloadable: false
 
-  - week: 13
-    week_padded: "13"
+  - week: 11
+    week_padded: "11"
     date: "Dec 1, 2026"
-    lab_label: "Lab 11"
-    title: "Bootstrap Estimates"
-    slug: "bootstrap-estimates"
+    lab_label: "Lab 11 (new)"
+    title: "Model Selection with AIC"
+    slug: "model-selection-aic"
     module: "Part 6: Extensions of the General Linear Model"
-    focus: "Resampling for confidence intervals. Empirical estimation of standard errors and non-parametric interval estimation."
-    deliverable: "Bootstrap loops (boot package)"
-    software: "boot package"
-    rmd_file: "rmd/lab11-bootstrap-estimates.Rmd"
+    focus: "Comparing candidate models rather than testing one at a time. AIC and delta-AIC as a likelihood-based alternative to significance testing for choosing among several plausible models fit to the same data."
+    deliverable: "AIC comparison table across candidate models + written justification of the selected model"
+    software: "AIC(), base R model objects; optional: MuMIn or bbmle package"
+    rmd_file: "rmd/lab11-model-selection-aic.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
     downloadable: false

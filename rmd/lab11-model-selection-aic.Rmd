@@ -1,5 +1,5 @@
 ---
-title: "Lab 7: GLM – Multifactor ANOVA"
+title: "Lab 11 (new): Model Selection with AIC"
 subtitle: "BIOL/OCSC 4605 · 7220 --- Statistical Analysis in Biology and Environmental Science"
 author: "Student Name (replace)"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
@@ -13,8 +13,8 @@ output:
     css: ../assets/css/course.css
     self_contained: true
 params:
-  week: 8
-  module: "Part 4: The General Linear Model – Multiple Explanatory Variables"
+  week: 11
+  module: "Part 6: Extensions of the General Linear Model"
   due_date: "YYYY-MM-DD"
 ---
 
@@ -50,7 +50,7 @@ set.seed(4605) # reproducible randomization / bootstrap results across labs
 
 ## Learning objectives
 
-> Factorial designs & interactions. Main effects, interaction terms, and visual interpretation of non-additive biological responses.
+> Comparing candidate models rather than testing one at a time. AIC and delta-AIC as a likelihood-based alternative to significance testing for choosing among several plausible models fit to the same data.
 
 By the end of this lab, you should be able to:
 
@@ -58,7 +58,7 @@ By the end of this lab, you should be able to:
 2. *(objective 2 --- edit me)*
 3. *(objective 3 --- edit me)*
 
-**Module:** Part 4: The General Linear Model – Multiple Explanatory Variables &nbsp;|&nbsp; **Week:** 8 &nbsp;|&nbsp; **Key deliverable:** Two-way ANOVA & interaction plots
+**Module:** Part 6: Extensions of the General Linear Model &nbsp;|&nbsp; **Week:** 11 &nbsp;|&nbsp; **Key deliverable:** AIC comparison table across candidate models + written justification of the selected model
 
 > Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 
@@ -104,7 +104,7 @@ e.g. Lab 1's physical-cards exercise.)*
 
 *(Residual plots, randomization overlays, homogeneity checks, or other
 verification appropriate to this lab's method. Primary tools this week:*
-`lm(), anova(), interaction.plot() / ggplot2`*.)*
+`AIC(), base R model objects; optional: MuMIn or bbmle package`*.)*
 
 ```{r diagnostics}
 
@@ -122,7 +122,7 @@ Work through the following and show your code and output for each.
 
 Answer in complete sentences below each question. These responses, together
 with your code above, are graded against this lab's key deliverable:
-**Two-way ANOVA & interaction plots**.
+**AIC comparison table across candidate models + written justification of the selected model**.
 
 **Q1.** *(question --- edit me)*
 

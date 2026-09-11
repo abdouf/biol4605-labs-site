@@ -42,6 +42,10 @@ jobs:
           cp -r templates/. _site/templates/
 
       - name: Copy only released lab R Markdown files
+        # _data/labs.yml's `downloadable` flag controls this per week -- a
+        # lab marked false has its .Rmd file left OUT of _site/ entirely,
+        # not just unlinked from the page, so there's no URL a student could
+        # guess or bookmark to get it before you release it.
         run: ruby scripts/copy_released_rmd.rb
 
       - name: Verify released/withheld rmd files match _data/labs.yml
