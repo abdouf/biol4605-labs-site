@@ -121,7 +121,7 @@ labs:
   - week: 5
     week_padded: "05"
     date: "Oct 20, 2026"
-    lab_label: "Lab 5a"
+    lab_label: "Lab 5"
     title: "GLM – Simple Regression"
     slug: "glm-simple-regression"
     module: "Part 3: The General Linear Model – Single Explanatory Variable"
@@ -134,20 +134,6 @@ labs:
 
   - week: 6
     week_padded: "06"
-    date: "Oct 27, 2026"
-    lab_label: "Lab 5b"
-    title: "GLM – Regression with Randomization"
-    slug: "glm-regression-randomization"
-    module: "Part 3: The General Linear Model – Single Explanatory Variable"
-    focus: "Model verification via randomization. Testing slope null hypotheses through empirical null distribution creation."
-    deliverable: "Resampling scripts & visual overlays"
-    software: "Base R resampling + ggplot2 overlays"
-    rmd_file: "rmd/lab05b-glm-regression-randomization.Rmd"
-    note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
-
-  - week: 7
-    week_padded: "07"
     date: "Nov 3, 2026"
     lab_label: "Lab 6a/b"
     title: "GLM – Single Factor ANOVA"
@@ -160,8 +146,8 @@ labs:
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
     downloadable: false
 
-  - week: 8
-    week_padded: "08"
+  - week: 7
+    week_padded: "07"
     date: "Nov 10, 2026"
     lab_label: "Lab 9a"
     title: "Problem-Solving with GLM (Setup)"
@@ -174,8 +160,8 @@ labs:
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
     downloadable: false
 
-  - week: 9
-    week_padded: "09"
+  - week: 8
+    week_padded: "08"
     date: "Nov 17, 2026"
     lab_label: "Lab 9b"
     title: "Problem-Solving with GLM (Execution)"
@@ -188,8 +174,8 @@ labs:
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
     downloadable: false
 
-  - week: 10
-    week_padded: "10"
+  - week: 9
+    week_padded: "09"
     date: "Nov 24, 2026"
     lab_label: "Lab 10"
     title: "Logistic Regression (GLM)"
@@ -202,8 +188,8 @@ labs:
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
     downloadable: false
 
-  - week: 11
-    week_padded: "11"
+  - week: 10
+    week_padded: "10"
     date: "Dec 1, 2026"
     lab_label: "Lab 11 (new)"
     title: "Model Selection with AIC"

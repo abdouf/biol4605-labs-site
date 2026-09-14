@@ -10,7 +10,7 @@ permalink: /syllabus/
 
 The six-part curriculum Dr. David C. Schneider originally developed, now
 delivered as [lectures by Dr. Amy Hurford](https://ahurford.github.io/biol-4605-f26/){:target="_blank"}
-and as these labs map onto the 11 lab weeks below.
+and as these labs map onto the 10 lab weeks below.
 [Schedule]({{ '/schedule/' | relative_url }}) for full weekly detail.
 {: .fs-6 .fw-300 }
 
@@ -36,27 +36,26 @@ Two complementary routes to a p-value: theoretical distribution functions
 reshuffling (Lab 4). Establishes that "the p-value" is a computed quantity,
 not a lookup.
 
-## Part 3: The General Linear Model (Weeks 5-7)
+## Part 3: The General Linear Model (Weeks 5-6)
 
-Simple regression fit two ways: by least squares (Lab 5a) and verified by
-randomization of the null slope (Lab 5b), followed by single-factor ANOVA as
+Simple regression (Lab 5) followed by single-factor ANOVA as
 the categorical-predictor case of the same linear model (Lab 6a/b).
 
-## Parts 3–5: Applied Integration (Weeks 8–9)
+## Parts 3–5: Applied Integration (Weeks 7–8)
 
 A two-part problem-solving sequence: formulating a research question into a
 verifiable model structure (Lab 9a), then executing the full pipeline with data
 cleaning, fitting, selection, diagnostics, and biological interpretation
 (Lab 9b).
 
-## Part 5: The Generalized Linear Model (Week 10)
+## Part 5: The Generalized Linear Model (Week 9)
 
 Extending beyond Gaussian errors to binary/proportional outcomes via logistic
 regression and the logit link (Lab 10).
 
-## Part 6: Extensions of the General Linear Model (Week 11)
+## Part 6: Extensions of the General Linear Model (Week 10)
 Comparing competing models by AIC/ΔAIC rather than testing one hypothesis at a time,
 a likelihood-based alternative and complement to the significance-testing approach
-used throughout Parts 3–5 (Lab 11).
+used throughout Parts 3–5 (Lab 10).
 
 ---

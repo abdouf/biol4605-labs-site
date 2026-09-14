@@ -1,12 +1,12 @@
 ---
 layout: default
-title: "Week 5 — Lab 5a: GLM – Simple Regression"
+title: "Week 5 — Lab 5: GLM – Simple Regression"
 parent: Labs
 nav_order: 5
 permalink: /labs/05/
 ---
 
-# Week 5 — Lab 5a: GLM – Simple Regression
+# Week 5 — Lab 5: GLM – Simple Regression
 
 **Module:** Part 3: The General Linear Model – Single Explanatory Variable
 
@@ -18,16 +18,16 @@ Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 **Key deliverable:** Annotated lm() output and diagnostic plots
 **Software / functions:** `lm(), summary(), plot() in R`
 
- ## Starter file
+## Starter file
 
-+{% assign this_lab = site.data.labs.labs | where: "week", 5 | first %}
-+{% if this_lab.downloadable %}
+{% assign this_lab = site.data.labs.labs | where: "week", 5 | first %}
+{% if this_lab.downloadable %}
  [Download lab05a-glm-simple-regression.Rmd]({{ '/rmd/lab05a-glm-simple-regression.Rmd' | relative_url }}){: .btn .btn-blue }
 
  Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
  editing.
-+{% else %}
-+_Materials for this lab will be posted here a few hours before the session._
-+{% endif %}
+{% else %}
+_Materials for this lab will be posted here a few hours before the session._
+{% endif %}
 
  [Back to schedule]({{ '/schedule/' | relative_url }})

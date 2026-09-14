@@ -21,11 +21,11 @@ be on GitHub Pages' restricted theme list.
 ├── Gemfile                  # Ruby deps (only needed for local preview)
 ├── .github/workflows/pages.yml   # builds + deploys on every push to main
 ├── index.md                 # home page
-├── syllabus.md               # 6-part curriculum -> 11-week mapping
+├── syllabus.md               # 6-part curriculum -> 10-week mapping
 ├── schedule.md               # full week-by-week table (rendered from _data/labs.yml)
 ├── resources.md               # software setup, packages, links
 ├── labs/index.md              # "Labs" parent nav page
-├── _data/labs.yml             # single source of truth for the 11-week schedule
+├── _data/labs.yml             # single source of truth for the 10-week schedule
 ├── _labs/                     # generated: one Jekyll page per week (do not hand-edit headers)
 ├── rmd/                       # generated: one starter .Rmd per week (Body will be edited)
 ├── templates/lab_template.Rmd # master R Markdown template all labs are generated from

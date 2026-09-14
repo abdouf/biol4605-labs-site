@@ -13,7 +13,7 @@ output:
     css: ../assets/css/course.css
     self_contained: true
 params:
-  week: 11
+  week: 10
   module: "Part 6: Extensions of the General Linear Model"
   due_date: "YYYY-MM-DD"
 ---
@@ -58,7 +58,7 @@ By the end of this lab, you should be able to:
 2. *(objective 2 --- edit me)*
 3. *(objective 3 --- edit me)*
 
-**Module:** Part 6: Extensions of the General Linear Model &nbsp;|&nbsp; **Week:** 11 &nbsp;|&nbsp; **Key deliverable:** AIC comparison table across candidate models + written justification of the selected model
+**Module:** Part 6: Extensions of the General Linear Model &nbsp;|&nbsp; **Week:** 10 &nbsp;|&nbsp; **Key deliverable:** AIC comparison table across candidate models + written justification of the selected model
 
 > Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 

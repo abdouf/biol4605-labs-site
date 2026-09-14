@@ -1,5 +1,5 @@
 ---
-title: "Lab 5a: GLM – Simple Regression"
+title: "Lab 5: GLM – Simple Regression"
 subtitle: "BIOL/OCSC 4605 · 7220 --- Statistical Analysis in Biology and Environmental Science"
 author: "Student Name (replace)"
 date: "`r format(Sys.Date(), '%d %B %Y')`"

@@ -19,7 +19,7 @@ Statistical Analysis in Biology and Environmental Science
 
 ## About this course
 
-This site organizes the 11 weekly labs for BIOL/OCSC 4605 (undergraduate) / BIOL 7220
+This site organizes the 10 weekly labs for BIOL/OCSC 4605 (undergraduate) / BIOL 7220
 (graduate). The six-part curriculum was originally developed by Dr. David C.
 Schneider ([*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/){:target="_blank"}), and the site is kept here for reference. For the current offering, lectures are delivered
 by Dr. Amy Hurford ([lecture notes](https://ahurford.github.io/biol-4605-f26/){:target="_blank"}),
@@ -33,10 +33,10 @@ ANOVA (Part 3), to an applied integration lab and the Generalized Linear Model
 
 ## How this site is organized
 
-- **[Schedule]({{ '/schedule/' | relative_url }})**: the full 11-week table, which includes module, lecture mapping, objectives, deliverables and software.
+- **[Schedule]({{ '/schedule/' | relative_url }})**: the full 10-week table, which includes module, lecture mapping, objectives, deliverables and software.
 - **[Labs]({{ '/labs/' | relative_url }})**: one page per week with objectives, deliverables, and a
   link to the downloadable R Markdown starter file for that lab.
 - **[Syllabus overview]({{ '/syllabus/' | relative_url }})**: how the six curriculum parts map onto
-  the 11 weeks.
+  the 10 weeks.
 - **[Resources]({{ '/resources/' | relative_url }})**: R/RStudio setup, package list, and links to
   Dr. Hurford's lecture site and Dr. Schneider's reference material.

@@ -20,10 +20,12 @@ Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 
 ## Lab materials
 
-This lab's instructions and exercises are Dr. Schneider's original
+This lab's instructions and exercises are Dr. David C. Schneider's original
 **"Inferential Cards"** lab, unchanged from his site:
 
 [Open Lab 1 (PDF) on Dr. Schneider's site ↗](https://davidcschneider.github.io/StatisticalScience/Labs/Lab01.pdf){:target="_blank" .btn .btn-outline }
+
+A step-by-step walkthrough of all three exercises will be projected during the Lab session.
 
 **What the session covers, in brief** (see the PDF above for the exact
 wording and full instructions your group will follow):
@@ -33,7 +35,7 @@ wording and full instructions your group will follow):
   errors before any hypothesis is involved.
 - **Exercise 2: Selected Card Method:** deliberately select cards rather
   than drawing at random, and compare what that does to the same
-  calculations. The contrast is the point of the exercise.
+  calculations — the contrast is the point of the exercise.
 - **Exercise 3: Platt Decision Tree Method:** apply Platt's strong-inference
   logic (devise multiple competing hypotheses up front, then pick a
   "crucial" test card that can rule hypotheses out rather than merely
@@ -45,7 +47,7 @@ wording and full instructions your group will follow):
   written comparison of the three methods, and answers to the lab's
   discussion questions.
 
-**Materials to bring:** each group (group of 3 students) needs one standard deck of playing cards
-(52 cards; jokers can be set aside). A regular deck works fine
+**Materials to bring:** each group (~3 students) needs one standard deck of playing cards
+(52 cards; jokers can be set aside).
 
-[Back to schedule]({{ '/schedule/' | relative_url }})
+ [Back to schedule]({{ '/schedule/' | relative_url }})

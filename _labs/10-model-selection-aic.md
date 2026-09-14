@@ -1,12 +1,12 @@
 ---
 layout: default
-title: "Week 11 — Lab 11 (new): Model Selection with AIC"
+title: "Week 10 — Lab 11 (new): Model Selection with AIC"
 parent: Labs
-nav_order: 11
-permalink: /labs/11/
+nav_order: 10
+permalink: /labs/10/
 ---
 
-# Week 11 — Lab 11 (new): Model Selection with AIC
+# Week 10 — Lab 11 (new): Model Selection with AIC
 
 **Module:** Part 6: Extensions of the General Linear Model
 
@@ -18,16 +18,16 @@ Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 **Key deliverable:** AIC comparison table across candidate models + written justification of the selected model
 **Software / functions:** `AIC(), base R model objects; optional: MuMIn or bbmle package`
 
- ## Starter file
+## Starter file
 
-+{% assign this_lab = site.data.labs.labs | where: "week", 11 | first %}
-+{% if this_lab.downloadable %}
+{% assign this_lab = site.data.labs.labs | where: "week", 10 | first %}
+{% if this_lab.downloadable %}
  [Download lab11-model-selection-aic.Rmd]({{ '/rmd/lab11-model-selection-aic.Rmd' | relative_url }}){: .btn .btn-blue }
 
  Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
  editing.
-+{% else %}
-+_Materials for this lab will be posted here a few hours before the session._
-+{% endif %}
+{% else %}
+_Materials for this lab will be posted here a few hours before the session._
+{% endif %}
 
  [Back to schedule]({{ '/schedule/' | relative_url }})

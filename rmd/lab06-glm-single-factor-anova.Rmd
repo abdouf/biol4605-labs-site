@@ -13,7 +13,7 @@ output:
     css: ../assets/css/course.css
     self_contained: true
 params:
-  week: 7
+  week: 6
   module: "Part 3: The General Linear Model – Single Explanatory Variable"
   due_date: "YYYY-MM-DD"
 ---
@@ -58,7 +58,7 @@ By the end of this lab, you should be able to:
 2. *(objective 2 --- edit me)*
 3. *(objective 3 --- edit me)*
 
-**Module:** Part 3: The General Linear Model – Single Explanatory Variable &nbsp;|&nbsp; **Week:** 7 &nbsp;|&nbsp; **Key deliverable:** ANOVA table with post-hoc contrasts
+**Module:** Part 3: The General Linear Model – Single Explanatory Variable &nbsp;|&nbsp; **Week:** 6 &nbsp;|&nbsp; **Key deliverable:** ANOVA table with post-hoc contrasts
 
 > Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 
