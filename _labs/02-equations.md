@@ -18,6 +18,13 @@ Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 **Key deliverable:** LaTeX / math notation in R Markdown
 **Software / functions:** `R Markdown + LaTeX math syntax`
 
+## Lab materials
+
+This lab's instructions and exercises are Dr. David C. Schneider's original
+**"Using Equations"** lab, unchanged from his site:
+
+[Open Lab 2 (PDF) on Dr. Schneider's site ↗](https://davidcschneider.github.io/StatisticalScience/Labs/Lab02.pdf){:target="_blank" .btn .btn-outline }
+
 ## Starter file
 
 {% assign this_lab = site.data.labs.labs | where: "week", 2 | first %}
