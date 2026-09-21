@@ -88,7 +88,7 @@ labs:
     software: "R Markdown + LaTeX math syntax"
     rmd_file: "rmd/lab02-equations.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
+    downloadable: true
 
   - week: 3
     week_padded: "03"

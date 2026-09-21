@@ -25,6 +25,8 @@ This lab's instructions and exercises are Dr. David C. Schneider's original
 
 [Open Lab 2 (PDF) on Dr. Schneider's site ↗](https://davidcschneider.github.io/StatisticalScience/Labs/Lab02.pdf){:target="_blank" .btn .btn-outline }
 
+[Find scientific literature here for your Lab2 Example 4 ↗](https://github.com/DavidCSchneider/StatisticalScience/tree/main/Data){:target="_blank" .btn .btn-outline }
+
 ## Starter file
 
 {% assign this_lab = site.data.labs.labs | where: "week", 2 | first %}

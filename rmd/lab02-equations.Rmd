@@ -22,13 +22,10 @@ params:
   ============================================================================
   STANDARD LAB TEMPLATE — BIOL/OCSC 4605 · 7220
   ============================================================================
-  This file was generated from templates/lab_template.Rmd, then hand-filled
-  with Lab 2 content (source: Dr. David C. Schneider, "Using Equations",
-  https://davidcschneider.github.io/StatisticalScience/Labs/Lab02.pdf).
-  Two things students need to supply directly from the PDF: Figure 1 estradiol
+  Things students need to get directly from the PDF: Figure 1 estradiol
   values for the Tamarin example, and the a/b allometric coefficients in the
   Notonecta table. Anderson & May's (1979) Table 4 parameter values for the
-  Helminth example live in that source paper, not in the lab PDF itself.
+  Helminth example live in the source paper.
   ============================================================================
 -->
 
@@ -63,9 +60,9 @@ By the end of this lab, you should be able to:
 
 A mathematical model is a translation: a described biological phenomenon, rewritten as symbols that can be estimated from data and checked against it. Every model in this lab is built with the same six-step recipe (**Table 2.1**, reproduced in full below), which forces you to be explicit about which variables matter, what relationship you are claiming holds between them, and what the parameters of that relationship actually mean in biological terms.
 
-This lab works through that recipe four times — once fully worked here as a demonstration (**Kleiber's Law**, relating metabolic rate to body mass), and three more times as your own group exercises (Lab 2a): a behavioural/physiological example (tamarin maternal behaviour), a morphological/allometric example (*Notonecta* head length), and an epidemiological example (a helminth infection model, Anderson & May 1979). For background reading on any of these, see Dr. David C. Schneider's original handout on [*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/){:target="_blank"}.
+This lab works through that recipe four times: once fully worked here as a demonstration (**Kleiber's Law**, relating metabolic rate to body mass), and three more times as your own group exercises (Lab 2a): a behavioural/physiological example (tamarin maternal behaviour), a morphological/allometric example (*Notonecta* head length), and an epidemiological example (a helminth infection model, Anderson & May 1979).
 
-**Table 2.1 — the 6-step recipe**
+**Table 2.1: the 6-step recipe**
 
 1. Write the equation in symbolic form (symbols only).
 2. Define each symbol in words and state units (if any).
@@ -78,18 +75,44 @@ This lab works through that recipe four times — once fully worked here as a de
 
 ### Worked demonstration: Kleiber's Law
 
-Kleiber's Law relates an animal's resting metabolic rate to its body mass:
+$$
+\dot{E} = \alpha M^{\beta}
+$$
+
+1. **Equation:** $\dot{E} = \alpha M^{\beta}$
+
+2. **Symbols:** $\dot{E}$ = resting metabolic rate; $M$ = body mass; $\alpha$ = scaling parameter (units that convert mass to metabolic rate); $\beta$ = unitless exponent.
+
+3. **Parameter estimates (passerine birds):** $\alpha = 129$ kcal day$^{-1}$ kg$^{-0.724}$, $\beta = 0.724$ → $\dot{E} = 129\,M^{0.724}$.
+
+5. **Units check:** 
+
+Kleiber's Law (the equation)
 
 $$\dot{E} = \alpha M^{\beta}$$
 
-Working through Table 2.1's six steps for this equation:
+Then,
 
-1. **Equation, symbols only:** $\dot{E} = \alpha M^{\beta}$
-2. **Define each symbol:** $\dot{E}$ = metabolic rate at rest; $M$ = mass of the animal; $\alpha$ = a parameter with units that scale metabolic rate to body mass; $\beta$ = a unitless parameter, slightly greater than a theoretical value of 2/3.
-3. **State the idea:** resting metabolic rate scales as a *power* of body mass, not in direct proportion to it.
-4. **Parameter estimates (passerine birds):** $\alpha = 129$ kcal day$^{-1}$ kg$^{-0.724}$, $\beta = 0.724$, so $\dot{E} = 129\,M^{0.724}$.
-5. **Units check:** raising $M$ (kg) to the power $\beta$ and multiplying by $\alpha$ (kcal day$^{-1}$ kg$^{-0.724}$) leaves units of kcal day$^{-1}$ on both sides.
-6. **Calculate:** substitute a bird's mass $M$ (in kg) to compute its predicted resting metabolic rate, in kcal/day.
+$$\alpha = \frac{\dot{E}}{M^\beta}$$
+
+Replacing values (including the units)
+
+What is $\alpha$?
+
+$\alpha$ equals 129 kilocalories per day (day$^{-1}$) per kilogram to the power of 0.724 (kg$^{-0.724}$)
+
+$$
+129\ \mathrm{kcal}\,\mathrm{day}^{-1}\,\mathrm{kg}^{-0.724}
+=
+\frac{129\ \mathrm{kcal}\, \mathrm{day}^{-1}} {\mathrm{kg}^{-0.724}}
+$$
+
+kg$^{-0.724}$ cancels from the numerator and denominatoir, leaving 129 kcal day$^{-1}$ on both sides.
+
+
+6. **Calculate:**
+
+With this equation, you should now be able to calculate the minimum food energy requirement (in kilocalories per day) of a 20 gram (0.02 kg) canary.
 
 ```{r kleiber-demo}
 alpha <- 129
@@ -105,9 +128,9 @@ metabolic_rate(0.03)
 
 In a study of 12 red-bellied tamarins, urinary estradiol was the most abundant urinary estrogen during late pregnancy. Infant survival divided the group into "good" and "poor" mothers: 5 of 6 good mothers had two surviving infants at one week (including two without prior sibling-care experience), while 10 of 13 infants of poor mothers had died by day 0. Figure 1 in the handout plots mean urinary-estradiol concentration across the last 35 days of gestation for good vs. poor mothers.
 
-> **Your task:** propose a variable relating estradiol level to mothering outcome, and carry it through all six steps of Table 2.1.
->
-> The specific numeric values in Figure 1 are embedded in an image in the PDF handout and must be read directly off the graph — transcribe your own readings before completing Step 4.
+**Your task:** propose a variable relating estradiol level to mothering outcome, and carry it through all six steps of Table 2.1.
+
+The specific numeric values in Figure 1 are embedded in an image in the PDF handout and must be read directly off the graph — transcribe your own readings before completing Step 4.
 
 ```{r step-1-tamarin}
 
@@ -117,9 +140,9 @@ In a study of 12 red-bellied tamarins, urinary estradiol was the most abundant u
 
 This is "example 104" from Simpson et al. (1960). The general allometric form is $y = a \cdot x^{b}$, where the exponent $b$ is called the *coefficient of allometry* (Greek *allo* = "other", *metron* = "measure") — it describes how strongly a body part stays in fixed proportion to total length as length changes. The measured part here is "synthlipsis to vertex", a measure of head length, in the water bug *Notonecta* (the backswimmer).
 
-> **Your task:** write the allometric equation with $x$ = total body length and $y$ = head length, define $a$ and $b$ in words with units, and fit $a$ and $b$ from the source table.
->
-> The specific $a$/$b$ coefficients are printed in a table inside the PDF and were not extractable as plain text — transcribe them directly from the handout.
+**Your task:** write the allometric equation with $x$ = total body length and $y$ = head length, define $a$ and $b$ in words with units, and fit $a$ and $b$ from the source table.
+
+The specific $a$/$b$ coefficients are printed in a table inside the PDF and were not extractable as plain text — transcribe them directly from the handout.
 
 ```{r step-2-notonecta}
 
@@ -129,23 +152,15 @@ This is "example 104" from Simpson et al. (1960). The general allometric form is
 
 This example comes from Anderson & May (1979), a foundational paper in mathematical epidemiology and parasitology. The handout directs you to their Table 4, which gives an equilibrium expression for the level of helminth infection in a host population.
 
-> **Your task:** locate Anderson & May (1979) Table 4, write the equilibrium-infection equation symbolically, define each parameter (transmission, mortality, recovery terms, etc.) in words with units, and substitute their reported estimates.
->
-> Table 4's specific parameter values are in the source paper itself, not the lab PDF — track down the full reference before class (see Background above for where published equations for Lab 2b can also be found).
+**Your task:** locate Anderson & May (1979) Table 4, write the equilibrium-infection equation symbolically, define each parameter (transmission, mortality, recovery terms, etc.) in words with units, and substitute their reported estimates.
+
+Table 4's specific parameter values are in the source paper itself, not the lab PDF — track down the full reference before class (see Background above for where published equations for Lab 2b can also be found).
 
 ```{r step-3-helminth}
 
+
 ```
 
-## Diagnostics / verification
-
-*(Primary tool this week: `R Markdown + LaTeX math syntax`.)* For every equation above, re-check Step 5 explicitly: write out the units on both sides of the equation and confirm they match. This is your main verification step this week — there are no residual plots or randomization overlays, since no data are being fit by a statistical model.
-
-```{r diagnostics}
-# Units check for Kleiber's Law, worked numerically as a sanity check:
-# alpha has units kcal day^-1 kg^-0.724, M has units kg, so alpha * M^beta
-# has units kcal day^-1 kg^-0.724 * kg^0.724 = kcal day^-1.
-```
 
 ## Exercises
 
@@ -160,34 +175,6 @@ Work through the following and show your code and output for each.
 ```{r step-lab2b}
 
 ```
-
-## Submission questions
-
-Answer in complete sentences below each question. These responses, together
-with your code above, are graded against this lab's key deliverable:
-**LaTeX / math notation in R Markdown**.
-
-**Q1.** For one of your three Lab 2a examples, write out Steps 1–3 of Table 2.1 (the symbolic equation, the definition of each symbol with units, and the idea it expresses in words) using inline or display LaTeX math syntax.
-
-> *(your answer here)*
-
-**Q2.** Why does Step 5 (checking that units balance) matter, even after you already have numeric parameter estimates for Step 4? Give a concrete example from one of today's equations.
-
-> *(your answer here)*
-
-**Q3.** For your Lab 2b literature example, what makes it a two-variable, two-parameter equation, and how does the process of completing Table 2.1 for it differ from working with an equation already broken down for you (like Kleiber's Law above)?
-
-> *(your answer here)*
-
-## Submission checklist
-
-- [ ] Code chunks all run top-to-bottom without error (Knit ▸ Knit to HTML)
-- [ ] All three Lab 2a examples (Tamarin, *Notonecta*, Helminth) carried through Steps 1–6 of Table 2.1
-- [ ] Lab 2b literature equation selected, with full reference stated, and Steps 1–6 completed
-- [ ] Submission questions answered in full sentences, with equations in proper LaTeX math syntax
-- [ ] File renamed / submitted per course LMS instructions
-
----
 
 ```{r session-info}
 sessionInfo()
