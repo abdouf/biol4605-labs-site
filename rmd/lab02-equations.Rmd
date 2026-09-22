@@ -124,6 +124,76 @@ metabolic_rate <- function(M) alpha * M^beta
 metabolic_rate(0.03)
 ```
 
+**Calculate:**
+
+With this equation, you should now be able to calculate the minimum food energy requirement (in kilocalories per day) of a 20 gram (0.02 kg) canary.
+
+```{r kleiber-key-passerine}
+alpha <- 129
+beta <- 0.724
+metabolic_rate <- function(M) alpha * M^beta
+
+metabolic_rate(0.02)  
+# a 20 g passerine ->
+metabolic_rate(0.10)  
+# a 100 g passerine ->
+```
+
+Everyone should do at least two of these on their own calculator, to become familiar with the mechanics.
+
+**Verbal statement: The expected metabolic rate of a 20 gram bird, based on Laseiwski and Dawson's equation, is 7.59 kcal per day.**
+
+
+**Try the same with Laseiwski and Dawson (1967) estimated α and β for non-passerine birds**
+
+```{r kleiber-key-nonpasserine}
+alpha <- 78.3
+beta <- 0.723
+metabolic_rate <- function(M) alpha * M^beta
+
+metabolic_rate(0.02)  
+# a 20 g non-passerine ->
+metabolic_rate(0.10)  
+# a 100 g non-passerine ->
+```
+
+
+Question: 
+
+Compare this equation to that for passerines. Which will have the greater metabolic rate, a passerine bird, or a non-passerine of the same mass?
+
+
+Try writing Kleiber's Law for $α = 540$, then calculate the metabolic rate for the 20 gram sparrow.
+
+```{r kleiber-key-sparrow1}
+alpha <- 540
+beta <- 0.724
+metabolic_rate <- function(M) alpha * M^beta
+
+metabolic_rate(0.02)  
+# a 20 g passerine (a sparrow)
+```
+
+
+This calculation is X times higher than the rate for a resting passerine.
+
+**Question: Why?**
+
+**The unit of $\alpha$ was incorrect**
+
+Try calculating the metabolic rate (in kilojoules per day) of a 20 gram passerine (a sparrow) and a 500 gram passerine (a crow).
+
+```{r kleiber-key-sparrow2}
+alpha <- 540 # KJ/day
+beta <- 0.724
+metabolic_rate <- function(M) alpha * M^beta
+
+metabolic_rate(0.02)  
+# a 20 g passerine (a sparrow)
+metabolic_rate(0.5)
+# a 500 g passerine (a crow)
+```
+
 ### Step 1 — Tamarin maternal behaviour (Lab 2a, example 1)
 
 In a study of 12 red-bellied tamarins, urinary estradiol was the most abundant urinary estrogen during late pregnancy. Infant survival divided the group into "good" and "poor" mothers: 5 of 6 good mothers had two surviving infants at one week (including two without prior sibling-care experience), while 10 of 13 infants of poor mothers had died by day 0. Figure 1 in the handout plots mean urinary-estradiol concentration across the last 35 days of gestation for good vs. poor mothers.
