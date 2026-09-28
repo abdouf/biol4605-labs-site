@@ -1,149 +1,717 @@
 ---
-title: "Lab 3: Probability Values from Distribution Functions"
+title: "Lab 3: Probability Models"
 subtitle: "BIOL/OCSC 4605 · 7220 --- Statistical Analysis in Biology and Environmental Science"
-author: "Student Name (replace)"
+author: "Your Name"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
 output:
   html_document:
     toc: true
     toc_float: true
     number_sections: false
-    code_folding: show
     theme: flatly
-    css: ../assets/css/course.css
     self_contained: true
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: false
 params:
   week: 3
   module: "Part 2: Quantifying Uncertainty"
-  due_date: "YYYY-MM-DD"
 ---
 
 <!--
   ============================================================================
-  STANDARD LAB TEMPLATE — BIOL/OCSC 4605 · 7220
+  INSTRUCTOR WALKTHROUGH -- BIOL/OCSC 4605 · 7220, Lab 3 "Probability Models"
   ============================================================================
-  This file was generated from templates/lab_template.Rmd. Keep the section
-  structure and YAML options consistent across labs so students always know
-  where to look. Replace every "(edit me)" / placeholder comment before
-  distributing this lab.
+  This file is a live-coding companion, not a blank student starter: this
+  lab's own stated goal is the *mechanics of calculation* (learning the
+  functions themselves), covering the binomial pdf and cdf, likelihood and 
+  likelihood ratios, and p-values / critical values for chi-squared, t, F, and 
+  the Normal (Z) distributions.
+  Every blank in the handout is answered here with real, runnable R code and a 
+  clearly labelled result. Section numbers and headings below match the handout's 
+  own numbering (Ex. 1-14).
 
-  To regenerate ALL 13 labs from an updated version of this template, edit
-  templates/lab_template.Rmd and re-run the generator script described in the
-  repo README, then re-apply any lab-specific edits you had made.
+  All computations use base R only (dbinom/pbinom/qbinom, dchisq/pchisq/
+  qchisq, dt/pt/qt, df/pf/qf, dnorm/pnorm/qnorm). No packages to install.
+  Knit to PDF or HTML from the dropdown next to the Knit button in RStudio.
   ============================================================================
 -->
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE, message = FALSE, warning = FALSE,
-  fig.width = 6, fig.height = 4
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                       fig.width = 5, fig.height = 4, fig.align = "center")
+```
+
+
+## Warm-up: your package as a calculator
+
+*Handout: "For a coin toss, the probability of Heads on the first toss is p = ___. Now calculate the probability of Heads on 2 successive tosses, p² = ___."*
+
+```{r warmup}
+p <- 0.5
+p          # probability of Heads on one toss
+p^2        # probability of Heads on 2 successive (independent) tosses
+```
+
+## Exercise 1: independent and dependent events
+
+*Handout: "Now calculate the probability of 4 Heads on 4 tosses."*
+
+```{r ex1-four-heads}
+# write the code to answer the question
+
+```
+
+*Handout: card draws without replacement — probability of 2 successive diamonds from a 52-card deck.*
+
+```{r ex1-cards}
+# P(diamond on the first draw)
+# How many diamonds in total in a card deck?
+# Ace, 2 through 10, Jack, Queen, and King (n/total cards)
+p_diamond_1 <- 1/2
+
+# How many diamonds remain after removing one?
+diamonds_remaining <- NA
+
+# How many cards remain after removing one?
+cards_remaining <- NA
+
+# What is the probability of another diamond?
+# This is called a conditional probability
+p_diamond_2_given_1 <- diamonds_remaining / cards_remaining  
+
+p_diamond_1
+p_diamond_2_given_1
+
+# Probability of 2 successive diamonds = product of the two (dependent) events
+p_two_diamonds <- p_diamond_1 * p_diamond_2_given_1
+p_two_diamonds
+```
+
+**Note:** Exercise 1's first part (coin tosses) multiplies two *independent* probabilities; the card draw multiplies a probability by a *conditional* probability, because removing a card changes the deck. Same multiplication rule, different justification.
+
+## Exercise 2: a single binomial probability (the planarian T-maze)
+
+In 1959 James V. McConnell created The Worm Runner's Digest (W.R.D.) to report his experiments with memory transfer in planarian worms (see Hartry AL et al 1964 Planaria: Memory transfer through cannibalism re-examined Science 146: 274-275).
+
+What is the probability that an untrained planarian worm will correctly guess whether to turn left or right to obtain food in a T-maze on 6 successive trials? I.e., what is the probability of 6 correct guesses by chance alone?
+
+*Handout: "What is the probability of 6 correct guesses by chance alone, out of 6 trials, with p = 0.5?"*
+*First by hand, then with `dbinom`.*
+
+```{r ex2-single-binomial}
+# By hand, for a run of all successes: f(x) = p^n when x = n
+# find p, which is 1 correct guess then p^n
+# write your math
+
+0.3^10
+
+# The general binomial pdf, via R's built-in function:
+# Find what the function does by running ?dbinom in the console
+# x is the number of successes
+# size = the number of trials
+# prob = probability of success on each trial.
+dbinom(x = 6, size = 6, prob = 0.5)
+```
+
+*Handout: "Now calculate the probability of a worm making 5 correct choices in 6 trials assuming a success rate of 50%*
+
+*Handout: "Calculate the probability of a worm making 7 correct choices in 7 trials assuming a success rate of 80%*
+
+
+```{r ex2-more-binomials}
+# 5 correct choices in 6 trials
+dbinom(x = NA, size = NA, prob = NA)
+# 7 correct choices in 7 trials
+dbinom(x = NA, size = NA, prob = NA)
+```
+
+## Exercise 3: the full binomial probability distribution
+
+What is a PDF?
+
+PDF stands for Probability Density Function. It is an important concept in statistics for understanding probabilities related to continuous random variables. It is a smooth curve that shows how likely different outcomes are within a range of values.
+
+*Handout: build a column `x = 0..6` and a matching column `f(x)`, then plot it.*
+
+*Run the R commands below line by line*
+
+
+```{r ex3-binomial-distribution}
+# Create a vector of possible outcomes (0 to 6 successes)
+x <- 0:6
+x
+# Calculate the binomial probability for each outcome in x
+# for n = 6 trials (size) and probability of success p = 0.5 (prob)
+f.x <- dbinom(x, size = 6, prob = 0.5)
+f.x
+# Combine x and f.x column-wise into a matrix to view outcomes alongside their probabilities
+cbind(x, f.x)
+
+# Check: the pdf must sum to 1 over all possible outcomes
+# Sum all calculated probabilities in f.x to verify they sum to 1.0
+sum(f.x)
+```
+
+```{r ex3-barplot, fig.cap="Binomial pdf, n=6, p=0.5"}
+barplot(f.x, names.arg = x, xlab = "x (successes in 6 trials)",
+        ylab = "f(x)", col = "steelblue3",
+        main = "Pr{X = x}, n = 6, p = 0.5")
+```
+
+## Exercise 4: likelihood and the likelihood ratio in games of chance (roulette, dice, and cards)
+
+*The likely value for the parameter $\pi$ ($\hat{\pi}$)*
+
+*Comapred to the previous experiment, instead of calculating the probability given a fixed parameter we calculate the likelihood of a parameter, given the data*
+
+*Handout: two experiments (9 successes in 10 trials; 7 successes in 10 trials). Calculate the likelihood $\mathcal{L}(\hat{\pi}\,|\,data)$ over a range of candidate $\pi$ values from 0.999 down to 0.50, find the maximum, and compute the likelihood ratio against $\pi = 0.5$.*
+
+```{r ex4-likelihood-setup}
+# candidate likelihood with pi = 0.5 (no learning) and pi = 0.999 (highly trained) 
+pi_candidates <- c(0.999, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50)
+# Experiment 1: 9 success over 10 trials
+L.exp1 <- dbinom(x = 9, size = 10, prob = pi_candidates)
+# Experiment 2: 7 success over 10 trials
+L.exp2 <- dbinom(x = 7, size = 10, prob = pi_candidates)
+
+likelihood_table <- data.frame(
+  pi = pi_candidates,
+  L_Experiment1 = round(L.exp1, 5),
+  L_Experiment2 = round(L.exp2, 5)
+)
+likelihood_table
+```
+
+*Maximum Likelihood*
+
+```{r ex4-max-likelihood}
+# For the first experiment, what is the maximum likelihood?
+# Experiment 1 (9 successes in 10 trials)
+max_L1 <- max(L.exp1)
+# Find the \hat_pi => the max likelihood
+pi_hat_1 <- pi_candidates[which.max(L.exp1)]
+
+L1_at_no_learning <- dbinom(9, 10, 0.5)
+
+# Calculate the likelihood ratio LR = Max($\hat \pi$|data) / L($\pi=0.5$|data)
+LR1 <- max_L1 / L1_at_no_learning
+
+max_L1        # maximum likelihood
+pi_hat_1      # pi-hat: the parameter value where likelihood is maximized
+LR1           # likelihood ratio vs. pi = 0.5 (no learning)
+
+# Experiment 2 (7 successes in 10 trials)
+max_L2 <- max(L.exp2)
+# Find the \hat_pi => the max likelihood
+pi_hat_2 <- pi_candidates[which.max(L.exp2)]
+L2_at_no_learning <- dbinom(7, 10, 0.5)
+LR2 <- max_L2 / L2_at_no_learning
+
+max_L2
+pi_hat_2
+LR2
+```
+
+*Evidence statement*
+
+Question: For Experiment2 (7 success over 10 trials) make a statement about the evidence relative to the following criteria
+
+If LR < 20 => little or no evidence of learning
+If LR $\geq 20$ => some evidence of learning
+
+**Model answer for the evidence statement:** with LR $\approx$ 2.28 (well below 20), the data from Experiment 2 provide little or no evidence of learning. A worm getting 7 correct out of 10 trials is not a rare enough result under the "no learning" ($\pi = 0.5$) model to be convincing on its own.
+
+**Note on the maximum-likelihood estimate:** 
+
+For a simple binomial count, $\hat{\pi} = x/n$ exactly, that's why $\hat{\pi}_1 = 9/10 = 0.9$ and $\hat{\pi}_2 = 7/10 = 0.7$ come out as the maximum of the candidate list above. 
+
+*Take-home message*: for a binomial count, $\hat{\pi} = x/n$ — always, exactly, no search required. 
+
+```{r ex4-evidence-statement}
+# TAKE-HOME MESSAGE: for ANY binomial count (x successes in n trials)
+# the maximum likelihood estimate of the success probability is always
+# pi.hat = x / n, EXACTLY. This is a general mathematical fact about the
+# binomial distribution. Whenever you have simple binomial count data,
+# you never need a grid search or a calculator to find pi.hat: just divide
+# successes by trials.
+
+mle_check <- function(x, n) {
+  # optimize() searches continuously over pi in (0,1) for the value that
+  # maximizes the binomial likelihood -- no candidate list required.
+  fit <- optimize(function(pi) dbinom(x, n, pi), interval = c(0, 1), maximum = TRUE)
+  data.frame(x = x, n = n,
+             x_over_n       = round(x / n, 4),
+             pi_hat_by_search = round(fit$maximum, 4))
+}
+
+# Four (x, n) pairs that have nothing to do with Experiment 1 or 2:
+results <- rbind(
+  mle_check(x = 3,  n = 8),
+  mle_check(x = 15, n = 40),
+  mle_check(x = 1,  n = 3),
+  mle_check(x = 50, n = 200)
+)
+results
+```
+
+## Exercise 5: the cumulative distribution function (cdf)
+
+What is a CDF?
+
+CDF stands for cumulative distribution function. The CDF complements the Probability Density Function and provides a cumulative view of the probabilities linked to a random variable. Unlike the smooth curve of the PDF, the CDF appears as a step function, jumping at specific values. It shows the probability that a random variable will be less than or equal to a given value.
+
+TO DO:
+
+Can a planarian worm learn to avoid endpoint D? In a maze with 2 levels (Left right) a randomly moving worm will arrive at each of the four endpoints (A, B, C, or D) with equal probability. 
+
+*What proportion of the time will a randomly moving worm arrive at endpoint D?*
+
+Write the answer below 
+
+$\pi = ?$
+
+*What is the chance of never arriving at D in 6 trials? f0*
+
+*What is the chance of arriving exactly once at D in 6 trials? f1*
+
+*What is the probability that an untrained worm will arrives at D once or never in 6 trials.*
+
+To calculate the answer, we need to accumulate probabilities.
+We need to add the probability of no arrivals (f0) and the probability of arriving once at D (f1).
+
+```{r ex5-by-hand}
+# write the code to compute f0
+
+# write the code to compute f1 
+
+# write the code to compute $Pr{x <= 1}$
+```
+
+
+```{r ex5-cdf-function}
+# The cumulative distribution function does the summing for us:
+# Find the function and the code for doing it
+
+```
+
+*Handout: build the full pdf-and-cdf table, x = 0..6.*
+
+```{r ex5-full-table}
+x <- 0:6
+f.x <- dbinom(x, size = 6, prob = 0.25)   # pdf
+F.x <- pbinom(x, size = 6, prob = 0.25)   # cdf
+
+pdf_cdf_table <- data.frame(x = x, `f(x)` = round(f.x, 4), `F(x)` = round(F.x, 4),
+                             check.names = FALSE)
+pdf_cdf_table
+```
+
+```{r ex5-cdf-barplot, fig.cap="Binomial cdf, n=6, p=0.25"}
+barplot(F.x, names.arg = x, xlab = "x", ylab = "F(x) = Pr{X <= x}",
+        col = "darkorange3", main = "Cumulative distribution, n = 6, p = 0.25")
+```
+
+## Exercise 6: the upper tail, $Pr\{X > x\}$
+
+In the previous example we looked at $Pr{X < x}$ the probability of X or less successes in n trials. Let's say we are interested in $Pr{X > x}$ the probability of more than X successes. To obtain this probability we calculate the cumulative probability $Pr{X < x}$, then subtract it from 1, to obtain Pr{X > x}. The CDF accumulates (sums) all individual probabilities from the lowest possible outcome up to $x$
+
+$$
+Pr{X > x} = 1 - \sum_{k = 0}^{x} f(x)
+$$
+Let's say x = 6 success, so possible outcomes are 0, 1, 2, 3, 4, 5, 6 successes.
+
+$$
+Pr{X > x} = 1 - f(0) - f(1) - f(2) - f(3) - f(4) - f(5) - f(6)
+$$
+
+```{r illustrate-cdf}
+################## COPY AND RUN THE WHOLE CHUNK #################
+# Parameters for the Binomial distribution
+n <- 6           # Number of trials
+p <- 0.25        # Probability of success
+x_cutoff <- 2    # Threshold x (e.g., calculating P(X > 2))
+
+# 1. Outcomes and Probability Mass Function (PMF)
+x <- 0:n
+f_x <- dbinom(x, size = n, prob = p)
+
+# 2. Cumulative Probability F(x) and Upper Tail Probability 1 - F(x)
+cdf_x <- pbinom(x_cutoff, size = n, prob = p)       # P(X <= x_cutoff)
+upper_tail <- 1 - cdf_x                             # P(X > x_cutoff)
+
+# 3. Assign colors: Blue for X <= x_cutoff, Orange for X > x_cutoff
+bar_colors <- ifelse(x <= x_cutoff, "skyblue", "orange")
+
+# 4. Generate the plot with expanded y-limits (+ 0.20 headroom)
+bp <- barplot(
+  f_x,
+  names.arg = x,
+  col = bar_colors,
+  border = "black",
+  xlab = "Number of Successes (k)",
+  ylab = "Probability f(k)",
+  main = bquote("Illustration of " ~ P(X > .(x_cutoff)) == 1 - F(.(x_cutoff))),
+  ylim = c(0, max(f_x) + 0.20)  # Increased height to prevent legend overlap
 )
 
-# Packages used in this lab -- uncomment / extend as needed.
-# library(tidyverse)
-# library(emmeans)
-# library(car)
-# library(boot)
+# 5. Add exact probability labels on top of each bar
+text(
+  x = bp,
+  y = f_x + 0.015,
+  labels = round(f_x, 4),
+  cex = 0.8
+)
 
-set.seed(4605) # reproducible randomization / bootstrap results across labs
+# 6. Add legend at topright (where right-tail bars are small) without border box
+legend(
+  "topright",
+  legend = c(
+    paste0("P(X <= ", x_cutoff, ") = F(", x_cutoff, ") = ", round(cdf_x, 4)),
+    paste0("P(X > ", x_cutoff, ") = 1 - F(", x_cutoff, ") = ", round(upper_tail, 4))
+  ),
+  fill = c("skyblue", "orange"),
+  bty = "n",  # Removes the solid box around legend
+  cex = 0.85
+)
+# Print values to console
+cat(sprintf("F(%d) = P(X <= %d) = %.5f\n", x_cutoff, x_cutoff, cdf_x))
+cat(sprintf("1 - F(%d) = P(X > %d) = %.5f\n", x_cutoff, x_cutoff, upper_tail))
 ```
 
-## Learning objectives
+*Handout: Try this yourself. "Can a planarian worm arrive at endpoint A 5 or more times in 6 trials?*
 
-> Parametric statistical distributions. Calculating p-values using continuous and discrete theoretical distributions (t, F, chi-squared, Normal).
+Compute $Pr\{X > 4\}$ two ways: (1) by summing the pdf's upper tail, and via (2) $1 - F(4)$."*
 
-By the end of this lab, you should be able to:
+```{r ex6-upper-tail}
+# Write the code for probability of 5 success in 6 trials with probability by trial being prob = 0.25 (f5)
+f5 <- dbinom(NA, size = NA, prob = NA)
+# Write the code for probability of 6 success in 6 trials with probability by trial being prob = 0.25 (f6)
 
-1. *(objective 1 --- edit me)*
-2. *(objective 2 --- edit me)*
-3. *(objective 3 --- edit me)*
+f6 <- dbinom(NA, size = NA, prob = NA)
 
-**Module:** Part 2: Quantifying Uncertainty &nbsp;|&nbsp; **Week:** 3 &nbsp;|&nbsp; **Key deliverable:** Worked p-value calculations
+f5
+f6
 
-> Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
+# Method 1: sum the tail of the pdf directly
+Pr_X_gt_4_pdf <- f5 + f6
+Pr_X_gt_4_pdf
 
+# Method 2: use the cdf, which is faster once n gets large
+Pr_X_gt_4_cdf <- 1 - pbinom(NA, size = NA, prob = NA)
+Pr_X_gt_4_cdf
 
-## Background
-
-*(One to two paragraphs of conceptual background specific to this lab. Link
-back to the relevant section of Schneider's*
-[*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/)*.)*
-
-## Data
-
-*(Describe or load the dataset used this week. Replace the placeholder code
-below with the actual read-in step, or remove it if this lab has no dataset,
-e.g. Lab 1's physical-cards exercise.)*
-
-```{r load-data}
-# df <- read.csv(here::here("data", "FILENAME.csv"))
-# str(df)
+# Confirm the two methods agree
+all.equal(Pr_X_gt_4_pdf, Pr_X_gt_4_cdf)
 ```
 
-## Guided walkthrough
+## Exercise 7: a harder maze, and comparing experimental designs
 
-### Step 1 --- *(edit me)*
+*Handout:*
 
-```{r step-1}
+(1) Draw a 3 tier maze with 8 possible endpoints (A-H). success = arrival at H
 
+(2) What is the expected arrive rate at H by chance on each run through the maze?
+
+$p_H = NA$
+
+(3) What is the chance of 4 correct arrivals at H in 4 trials? ($Pr\{X=4\}$)
+
+(4) What is the chance of 3 or more correct endpoints in 4 trials? ($Pr\{X>2\}$)
+
+(4) Compare this design against the 2-tier/6-trial design from Exercises 5-6.*
+
+```{r ex7-three-tier-maze}
+p_H <- NA          
+# expected arrival rate at H by chance, one of 8 endpoints
+p_H
+
+# write the code for the chance of 4 correct arrivals at H in 4 trials? ($Pr\{X=4\}$)
+Pr_X_eq_4 <- dbinom(NA, size = NA, prob = p_H)
+Pr_X_eq_4
+
+# write the code for the chance of 3 or more correct in 4 trials ($Pr\{X>2\}$)
+Pr_X_gt_2 <- 1 - pbinom(NA, size = 4, prob = p_H)
+Pr_X_gt_2
 ```
 
-### Step 2 --- *(edit me)*
+*Handout: "At what value of x does $Pr\{X>x\}$ fall below 5% in each maze? Which design is more efficient (fewer trials to reach the 5% criterion)?"*
 
-```{r step-2}
+```{r ex7-design-comparison}
+# 2-tier maze: n = 6 trials, p = 0.25 (Exercises 5-6)
+x2 <- 0:6
 
+# Calculate the probability of getting strictly more than $x_2$ successes out of 6 trials 
+upper_tail_2tier <- 1 - pbinom(x2, size = 6, prob = 0.25)
+
+# Put the successes and the probabilities together in a dataframe
+data.frame(x = x2, `Pr{X>x}` = round(upper_tail_2tier, 4), check.names = FALSE)
+
+# Find the x success where the probability is below 5% (0.05)
+x2[upper_tail_2tier < 0.05]
+x2_crit <- min(x2[upper_tail_2tier < 0.05])
+x2_crit
+
+# 3-tier maze: n = 4 trials, p = 1/8
+x3 <- 0:4
+# Calculate the probability of getting strictly more than $x_3$ successes out of 4 trials
+upper_tail_3tier <- 1 - pbinom(x3, size = 4, prob = p_H)
+
+# Put the successes and the probabilities together in a dataframe
+data.frame(x = x3, `Pr{X>x}` = round(upper_tail_3tier, 4), check.names = FALSE)
+
+# Find the x success where the probability is below 5% (0.05)
+x3[upper_tail_3tier < 0.05]
+x3_crit <- min(x3[upper_tail_3tier < 0.05])
+x3_crit   
+# smallest x where the 3-tier maze crosses below 5%
 ```
 
-### Step 3 --- *(edit me)*
+**Model answer:** the 2-tier maze needs $x=n$ (out of 6 trials) to fall below the 5% criterion; the 3-tier maze needs only $x=n$ (out of 4 trials).
 
-```{r step-3}
+The n-tier maze is the more efficient design. It reaches statistical significance with fewer trials
 
+## Exercise 8: the chi-squared distribution and the G-statistic
+
+The $G$-statistic (also called the Likelihood Ratio Test statistic) is a single number that measures how much better your best explanation fits the data compared to pure random chance.
+
+Imagine you are testing whether an animal in a T-maze is actually learning or just guessing randomly:
+
+Null Model (Chance): Assumes no learning ($\pi = 0.5$).
+
+Observation (data): observed success rate (e.g., $\pi = 0.7$).
+
+The Likelihood Ratio ($LR$) tells you how many times more plausible the best-fit model is compared to pure chance.
+
+Likelihood no learning = 0.2668279
+
+Likelihood observed success rate = 0.1171875
+
+Likelihood ratio (LR) = $\frac{0.2668279}{0.1171875} = 2.28$
+
+*For this Experiment the data was about $2.28$ times more likely under*
+
+Is the difference large enough?
+
+To evaluate this we use the G statistic = $2 ln(LR)$.
+
+The $G$-statistic converts that raw Likelihood Ratio into a standardized statistical scale
+
+Compute $G = 2\ln(LR)$ and its chi-squared p-value.
+
+```{r ex8-G-statistic}
+# We are getting variables from Exercise 4 (exact, unrounded)
+# Experiment 2 (7 successes in 10 trials)
+# max_L2 is max(L.exp2)
+# L2_at_no_learning <- dbinom(7, 10, 0.5)
+LR_exp2 <- max_L2 / L2_at_no_learning
+LR_exp2
+
+G_exp2 <- 2 * log(LR_exp2)
+G_exp2
+
+# Upper-tail p-value from the chi-squared distribution, df = 1
+p_exp2 <- 1 - pchisq(G_exp2, df = 1)
+p_exp2
 ```
 
-## Diagnostics / verification
+Because $G$ matches the $\chi^2$ curve, you can instantly look up a $p$-value to answer: "What is the probability of getting a $G$ score this high purely by random luck?"
 
-*(Residual plots, randomization overlays, homogeneity checks, or other
-verification appropriate to this lab's method. Primary tools this week:*
-`Base R distribution functions (pnorm, pt, pf)`*.)*
+$G \approx 0$: Your model is no better than guessing.
 
-```{r diagnostics}
+Large $G$: Your model fits significantly better than guessing.
 
+*Handout trial run: "As a trial run, we'll use a value of G = 3.84."*
+
+We calculate probabilities for the $\chi^2$ distribution, which is used for hypothesis testing. As an example, we’ll use the coin-tossing experiment that resulted in 7 successes in 10 trials.
+
+```{r ex8-trial-run}
+# We want the probability in the upper tail Pr{ \chi^2 (df) > G}.
+# We want the probability in the upper tail Pr{ \chi^2 (1) > G}.
+# we define G_trial
+G_trial <- 3.84
+
+# This is the LOWER tail, Pr{chisq(1) <= G} =~ 0.95
+pchisq(G_trial, df = 1)         
+# this is the LOWER tail, Pr{chisq(1) <= G} =~ 0.95
+
+1 - pchisq(G_trial, df = 1)     
+# this is the UPPER tail we actually want, ~0.05
 ```
 
-## Exercises
+*Handout: more G/df combinations to evaluate.*
 
-Work through the following and show your code and output for each.
+```{r ex8-more-G-values}
+G_values <- c(5.67, 10.23)
+df_values <- c(3, 5)
+p_values <- 1 - pchisq(G_values, df_values)
 
-1. *(exercise 1 --- edit me)*
-2. *(exercise 2 --- edit me)*
-3. *(exercise 3 --- edit me)*
+data.frame(G = G_values, df = df_values, p = round(p_values, 4))
+```
 
-## Submission questions
+*Handout: "For the second coin tossing experiment, $G_{Experiment2} = 2\ln(LR) = 2\ln(2.3)$, df = 1, p = ___."*
 
-Answer in complete sentences below each question. These responses, together
-with your code above, are graded against this lab's key deliverable:
-**Worked p-value calculations**.
+```{r ex8-experiment2-rounded}
+# Using the handout's own rounded LR = 2.3, for comparison with the exact value above
+G_rounded <- 2 * log(2.3)
+p_rounded <- 1 - pchisq(G_rounded, df = 1)
 
-**Q1.** *(question --- edit me)*
+G_rounded
+p_rounded
+```
 
-> *(your answer here)*
 
-**Q2.** *(question --- edit me)*
+## Exercise 9: comparing the chi-squared pdf and cdf
 
-> *(your answer here)*
+*Handout: given a short table of $\chi^2$ pdf values, fill in the cdf column and compare a hand-sketch against the computed graph.*
 
-**Q3.** *(question --- edit me)*
+Let's compare the probability density function pdf and the cumulative distribution function cdf of the chisquare distribution having 1 degree of freedom.
 
-> *(your answer here)*
+```{r ex9-table}
+chisq_x <- c(0.5, 1, 2, 4, 8)
 
-## Submission checklist
+pdf_vals <- dchisq(chisq_x, df = 1)
+cdf_vals <- pchisq(chisq_x, df = 1)
+upper_vals <- 1 - cdf_vals
 
-- [ ] Code chunks all run top-to-bottom without error (Knit ▸ Knit to HTML)
-- [ ] All placeholder text above has been replaced
-- [ ] Submission questions answered in full sentences
-- [ ] File renamed / submitted per course LMS instructions
+data.frame(x = chisq_x,
+           `pdf = f(x)` = round(pdf_vals, 4),
+           `cdf = F(x)` = round(cdf_vals, 4),
+           `1 - cdf` = round(upper_vals, 4),
+           check.names = FALSE)
+```
 
----
+
+```{r ex9-plots, fig.width=8, fig.height=4, fig.cap="Chi-squared (df=1) pdf and cdf"}
+xx <- seq(0.05, 10, length.out = 300)   
+# A smooth curve for comparison with a hand sketch
+
+par(mfrow = c(1, 2))
+plot(xx, dchisq(xx, df = 1), type = "l", lwd = 2, col = "firebrick",
+     xlab = expression(chi^2), ylab = "f(x)", main = "pdf")
+points(chisq_x, pdf_vals, pch = 19)
+
+plot(xx, pchisq(xx, df = 1), type = "l", lwd = 2, col = "navy",
+     xlab = expression(chi^2), ylab = "F(x)", main = "cdf")
+points(chisq_x, cdf_vals, pch = 19)
+par(mfrow = c(1, 1))
+```
+
+**Discussion: Comment on your initial sketch of the cdf, compared to the graph from calculations** 
+
+(1) the cdf climbs very fast over the first unit or two then flattens out slowly across a long right tail.
+
+(2) What else?
+
+## Exercise 10: the t-distribution
+
+The t-distribution is used to calculate probabilities when comparing two means, two slopes, etc.
+
+**Why this matters:** the t-distribution is what lets you ask "are these two small groups actually different, or could that difference just be chance?" 
+
+Common question in biology, comparing treatment vs. control, site A vs. site B, before vs. after. 
+
+$t_{obs}$ stands for the observed $t$-statistic (this is your test score from your experimental data)
+
+$$
+t_{obs} = \frac{\text{Observed Difference} - \text{Hypothesized Difference}}{\text{Standard Error}}
+$$
+
+(1) $t_{obs} = 0$: Your sample result exactly matches the null hypothesis (no effect, no difference).
+
+(2) Large $\vert{}t_{obs}\vert{}$ (e.g., $> 2.0$): The difference between the samples is unlikely to be pure random noise.
+
+Compute the p-value using $t_{obs}$
+
+*Handout: two-tailed p-value for $t_{obs}=-2.179$, df=12; one-tailed p-value for $t_{obs}=1.96$, df=300.*
+
+(1) Two-Tailed Test (Non-Directional): You want to know if a sample mean is significantly different from a baseline (either higher OR lower). Your significance threshold ($\alpha = 0.05$) is split equally between both tails of the distribution ($0.025$ in the left tail, $0.025$ in the right tail).
+
+(2) One-Tailed Test (Directional): You specifically predict before collecting data that the value will go in one exact direction (e.g., higher, better, faster). Because you only care about one side, the entire significance threshold ($\alpha = 0.05$) is placed into that single tail.
+
+```{r ex10-t-distribution}
+lefttail <- pt(-2.179, df = 12)
+righttail <- 1 - pt(2.179, df = 12)
+twotail <- lefttail + righttail
+twotail # two-tailed p-value, t = -2.179, df = 12
+
+onetail <- 1 - pt(1.96, df = 300)
+onetail    # one-tailed p-value, t = 1.96, df = 300
+
+# Two small groups of seedling heights (cm), grown under two light conditions
+low_light  <- c(15.2, 16.1, 14.8, 15.9, 16.4)
+high_light <- c(17.3, 18.0, 16.9, 17.6, 18.2)
+
+t.test(low_light, high_light)
+# `t.test()` just computes $t_{obs}$ and looks up its p-value in one step.
+```
+
+## Exercise 11: the F-distribution
+
+The F-distribution is used to calculate probabilities when comparing several means (comparing three fertilizer treatments, four sites, five diets)
+
+*Handout: upper-tail p-values for three $F_{obs}$ values, numerator df = 8, denominator df = 23.*
+
+```{r ex11-F-distribution}
+F_obs <- c(4.56, 2.28, 1.23)
+p_F <- 1 - pf(F_obs, df1 = 8, df2 = 23)
+
+data.frame(F_obs = F_obs, p = round(p_F, 4))
+```
+
+*Note* `aov()` just does the sums-of-squares and the `pf()` lookup for you.
+
+## Exercise 12: the Z-statistic (Normal distribution)
+
+the Z-statistic is the t-distribution's simpler cousin. You use it when the population mean and standard deviation are already known from a large reference dataset.
+
+*Handout: two-tailed probability for $Z = 1.96$, $\mu=0$, $\sigma=1$.*
+
+```{r ex12-Z}
+Z <- 1.96
+p_Z_twotailed <- 2 * (1 - pnorm(Z, mean = 0, sd = 1))
+p_Z_twotailed
+```
+
+
+## Exercise 13: critical values (the inverse cdf)
+
+In R, the Cumulative Distribution Function (CDF) for the Chi-Square ($\chi^2$) distribution is `pchisq()`.
+
+`pchisq(q, df)`
+
+Calculates the cumulative probability from $0$ up to $q$ for a given degree of freedom df
+
+*Handout: find the inverse chi-squared cdf, and check that it returns 3.84 for df=1 at the 95th percentile (i.e., the 5% upper-tail critical value).*
+
+```{r ex13-inverse-chisq}
+qchisq(0.95, df = 1)   # should return ~3.84, matching Exercise 8's trial run
+```
+
+**Note:** `qchisq` is the *inverse* of `pchisq`. `pchisq` goes from a statistic $t_{obs}$ to a probability (p-value), `qchisq` goes from a probability back to a statistic.
+
+## Exercise 14: extreme alpha levels, and building your own critical-value table
+
+*Handout: An extremely conservative morphologist wants Type I error set at $\alpha$ = 0.0001. Find the critical $\chi^2$ value (df=1) at this level.*
+
+```{r ex14-extreme-chisq}
+qchisq(1 - 0.0001, df = 1)
+```
+
+*Handout: Table 3.1 — critical t-values at unusual alpha levels (0.002 and 0.0002), for df = 1, 5, 10. The handout's own worked row (df = 1) is given as a check: 159.156 and 1590.*
+
+```{r ex14-t-table}
+df_vals <- c(1, 5, 10)
+alpha_vals <- c(0.002, 0.0002)
+
+# One-tailed critical values, matching the convention used for qchisq above
+# (an upper-tail area equal to alpha, not alpha/2 -- this is what reproduces
+# the handout's own df=1 check values of 159.156 and 1590)
+t_table <- outer(df_vals, alpha_vals, function(d, a) qt(1 - a, df = d))
+dimnames(t_table) <- list(paste0("df=", df_vals), paste0("alpha=", alpha_vals))
+round(t_table, 3)
+```
 
 ```{r session-info}
 sessionInfo()

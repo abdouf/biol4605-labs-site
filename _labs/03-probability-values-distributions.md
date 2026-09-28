@@ -18,6 +18,13 @@ Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 **Key deliverable:** Worked p-value calculations
 **Software / functions:** `Base R distribution functions (pnorm, pt, pf)`
 
+## Lab materials
+
+This lab's instructions and exercises are Dr. David C. Schneider's original
+**"Probability Models"** lab, unchanged from his site:
+
+[Open Lab 3 (PDF) on Dr. Schneider's site ↗](https://davidcschneider.github.io/StatisticalScience/Labs/Lab03.pdf){:target="_blank" .btn .btn-outline }
+
 ## Starter file
 
 {% assign this_lab = site.data.labs.labs | where: "week", 3 | first %}
