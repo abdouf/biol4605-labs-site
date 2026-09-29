@@ -102,7 +102,7 @@ labs:
     software: "Base R distribution functions (pnorm, pt, pf)"
     rmd_file: "rmd/lab03-probability-values-distributions.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
+    downloadable: true
 
   - week: 4
     week_padded: "04"
