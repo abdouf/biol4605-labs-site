@@ -1,149 +1,496 @@
 ---
 title: "Lab 4: Probability Values by Randomization"
 subtitle: "BIOL/OCSC 4605 · 7220 --- Statistical Analysis in Biology and Environmental Science"
-author: "Student Name (replace)"
+author: "Your Name"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
 output:
   html_document:
     toc: true
     toc_float: true
     number_sections: false
-    code_folding: show
     theme: flatly
-    css: ../assets/css/course.css
     self_contained: true
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: false
 params:
   week: 4
   module: "Part 2: Quantifying Uncertainty"
-  due_date: "YYYY-MM-DD"
 ---
 
 <!--
   ============================================================================
-  STANDARD LAB TEMPLATE — BIOL/OCSC 4605 · 7220
+  INSTRUCTOR WALKTHROUGH -- BIOL/OCSC 4605 · 7220, Lab 4 "Probability Values
+  by Randomization"
   ============================================================================
-  This file was generated from templates/lab_template.Rmd. Keep the section
-  structure and YAML options consistent across labs so students always know
-  where to look. Replace every "(edit me)" / placeholder comment before
-  distributing this lab.
+  Source: the course's Lab 4 handout ("Laboratory #4. Probability Values
+  by Randomization"), a 10-page worksheet that builds a randomization test
+  step by step on the Daphnia data (Box 9.5, Sokal and Rohlf 1995).
 
-  To regenerate ALL 13 labs from an updated version of this template, edit
-  templates/lab_template.Rmd and re-run the generator script described in the
-  repo README, then re-apply any lab-specific edits you had made.
+  This file follow the order of the printed handout, and every blank in the handout
+  is answered with real, runnable R code. All computations use base R only 
+  (no packages to install).
+
+  Knit to PDF or HTML from the dropdown next to the Knit button in RStudio.
   ============================================================================
 -->
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE, message = FALSE, warning = FALSE,
-  fig.width = 6, fig.height = 4
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                       fig.width = 6, fig.height = 4, fig.align = "center")
+```
+
+**The one idea of the whole lab:** if there is really no difference between two groups, then the group labels are meaningless, and shuffling the data between the groups should produce differences about as big as the one we observed. If our observed difference is *typical* of the shuffled differences, chance alone explains it. If it is *extreme*, chance is a poor explanation.
+
+## The recipe: Table 4.1 and the flow diagram
+
+*Handout: "Look again at Table 4.1 and then draw a flow diagram (boxes and arrows) showing how to do a randomization test."*
+
+Table 4.1 gives the six steps of every randomization test:
+
+1. Compute a statistic (the observed outcome).
+2. Make the null hypothesis true by randomizing the data.
+3. Re-compute the statistic to obtain an outcome when the null hypothesis is true.
+4. Repeat this many times.
+5. Construct a frequency distribution of outcomes when the null hypothesis is true.
+6. Compare the observed outcome to the distribution of outcomes, in order to calculate a probability value.
+
+Here is one possible flow diagram for the handout's blank box, drawn in base R. Step 4 is a loop: steps 2 and 3 are repeated many times.
+
+```{r flow-diagram, fig.width=6.5, fig.height=7.2, fig.cap="Flow diagram for a randomization test (Table 4.1)"}
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+plot(NA, xlim = c(0, 10), ylim = c(0, 14), axes = FALSE, xlab = "", ylab = "", asp = NA)
+
+labels <- c("1. Compute the statistic\n(observed outcome)",
+            "2. Make the null hypothesis true:\nrandomize the data",
+            "3. Re-compute the statistic\nfor the randomized data",
+            "4. Repeat steps 2 and 3\nmany times",
+            "5. Build the frequency distribution\nof outcomes under the null",
+            "6. Compare the observed outcome\nto the distribution: p-value")
+ytop <- c(13.5, 11.2, 8.9, 6.6, 4.3, 2.0)    # top edge of each box
+h <- 1.7                                      # box height
+
+for (i in 1:6) {
+  fill <- if (i == 6) "#cfe8cf" else if (i %in% c(2, 3, 4)) "#fde9c9" else "#d6e4f5"
+  rect(2, ytop[i] - h, 8, ytop[i], col = fill, border = "grey30", lwd = 1.5)
+  text(5, ytop[i] - h / 2, labels[i], cex = 0.95)
+}
+for (i in 1:5) {   # arrows from each box down to the next
+  arrows(5, ytop[i] - h, 5, ytop[i + 1], length = 0.12, lwd = 1.5)
+}
+# the loop: from the bottom of step 4 back up to step 2 (the repeat)
+segments(8, ytop[4] - h / 2, 9.4, ytop[4] - h / 2, lwd = 1.5)
+segments(9.4, ytop[4] - h / 2, 9.4, ytop[2] - h / 2, lwd = 1.5)
+arrows(9.4, ytop[2] - h / 2, 8, ytop[2] - h / 2, length = 0.12, lwd = 1.5)
+text(9.55, (ytop[4] + ytop[2] - h) / 2, "repeat", srt = 90, cex = 0.85)
+```
+
+## Part 1: the research question and the data
+
+*Handout: "Does the average age at beginning of reproduction in one strain of* Daphnia longispina *differ from that of another strain?" The data are Box 9.5 of Sokal and Rohlf (1995).*
+
+**How many rows of data do you see?** The data file has **7 rows**, one age (in days) per row for each of the two strains. (The file also has a block of descriptive text *below* the 7 rows, which is why the handout's import command says `nrows=7`.)
+
+**Which package do we use for this lab?** R.
+
+### Define the data
+
+The handout shows two ways to get the data into R. The chunk after them types the 7 pairs in directly, so the rest of this document runs anywhere.
+
+1. Download the data directly to your computer
+
+```{r load-by-download, eval=FALSE}
+# 1. Download the Daphnia data file from the course website to your desktop.
+# 2. Open the data and look at the data.
+filelocation1 <- "/Users/abdoufofana/Desktop/DaphniaAges.txt"
+daphnia <- read.table(filelocation1, nrows = 7, sep = "\t", header = FALSE)
+names(daphnia) <- c("Strain1", "Strain2")
+
+# How many rows of data do you see? 
+# Write the code to find the number of rows
+nrow(daphnia)
+```
+
+2. Load your data directly from an online source
+
+```{r load-from-online, eval=FALSE}
+#------------------------ OTHER METHODS ---------------------#
+# 1. Copy the Daphnia data file link from the course website
+
+"https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/main/Data/Labs/DaphniaAges.txt"
+
+# 2. Load the Daphnia data in R using the link from the course website
+filelocation2 <- "https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/main/Data/Labs/DaphniaAges.txt"
+
+daphnia <- read.table(filelocation1, nrows = 7, sep = "\t", header = FALSE)
+names(daphnia) <- c("Strain1", "Strain2")
+```
+
+*Handout typo: the handout's first import line writes `sep=" "` where the space between the quotes is meant to be a tab, which is easy to lose when copying. Writing `"\t"` makes the tab explicit. Also note the handout uses the object name `Daphnia` in one place and `daphnia` in another: R is case-sensitive, so these are two different objects. This script uses `daphnia` throughout.*
+
+3. Type the data directly in R
+
+```{r type-data}
+# Data was typed in R directely
+# Age (days) at first reproduction, Daphnia longispina (Box 9.5, Sokal & Rohlf 1995)
+daphnia <- data.frame(
+  Strain1 = c(7.2, 7.1, 9.1, 7.2, 7.3, 7.2, 7.5),
+  Strain2 = c(8.8, 7.5, 7.7, 7.6, 7.4, 6.7, 7.2)
 )
-
-# Packages used in this lab -- uncomment / extend as needed.
-# library(tidyverse)
-# library(emmeans)
-# library(car)
-# library(boot)
-
-set.seed(4605) # reproducible randomization / bootstrap results across labs
+daphnia        # look at the data
+nrow(daphnia)  # how many rows? 7
+str(daphnia)
 ```
 
-## Learning objectives
+## Part 2: the observed statistic, AvDiff
 
-> Non-parametric / permutation tests. Empirical p-value computation via Monte Carlo reshuffling of observational data.
+*Handout: "Having defined the data, we calculate the difference in means between Strain1 and Strain2."*
 
-By the end of this lab, you should be able to:
+The statistic is the difference between the two sample means, which the handout calls **AvDiff**. The `$` operator picks one column out of a data frame (`Filename$Variablename`).
 
-1. *(objective 1 --- edit me)*
-2. *(objective 2 --- edit me)*
-3. *(objective 3 --- edit me)*
+```{r observed-statistic}
+k1 <- mean(daphnia$Strain1)   # mean age at first reproduction, Strain 1
+k2 <- mean(daphnia$Strain2)   # mean age at first reproduction, Strain 2
+k3 <- k1 - k2                 # AvDiff = mean(Y1) - mean(Y2)
 
-**Module:** Part 2: Quantifying Uncertainty &nbsp;|&nbsp; **Week:** 4 &nbsp;|&nbsp; **Key deliverable:** Custom simulation loops in R
-
-> Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
-
-
-## Background
-
-*(One to two paragraphs of conceptual background specific to this lab. Link
-back to the relevant section of Schneider's*
-[*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/)*.)*
-
-## Data
-
-*(Describe or load the dataset used this week. Replace the placeholder code
-below with the actual read-in step, or remove it if this lab has no dataset,
-e.g. Lab 1's physical-cards exercise.)*
-
-```{r load-data}
-# df <- read.csv(here::here("data", "FILENAME.csv"))
-# str(df)
+k1
+k2
+k3
 ```
 
-## Guided walkthrough
+*Handout: "Report the difference (in days) to 3 significant figures; then re-write it in units of hours."*
 
-### Step 1 --- *(edit me)*
+```{r avdiff-units}
+# Example of how to report the difference in days to n significant figures
+# difference in days = 0.87675456
+# significant figures = 2
+signif(0.87675456,2)
 
-```{r step-1}
+# Write the code to Report the difference (in days) k3 to 3 significant figures
+AvDiff_days  <- signif(NA,NA)     # 3 significant figures
+# Make sure you convert k3 days to hours 
+AvDiff_hours <- signif(NA,NA)     # 24 hours per day
 
+AvDiff_days    # days
+AvDiff_hours   # hours
 ```
 
-### Step 2 --- *(edit me)*
+**Answer:** 
+AvDiff = n days 
+AvDiff = n hours
+Write a sentence stating the difference in the average age at beginning of reproduction between Strain 1 and Strain 2
 
-```{r step-2}
+## Part 3: one random difference (RanDiff)
 
+*Handout: "Could this difference be merely a matter of chance? To find out we randomize the data, to compute the difference in time to reproduction due to chance variation."*
+
+The recipe for one random difference is: stack the two strains into one pool of 14 ages; draw 7 values at random for a fake "Strain 1" (RV1) and 7 for a fake "Strain 2" (RV2); take the difference of their means. If the null hypothesis is true, the strain labels carry no information, so the pool is all we have.
+
+```{r one-random-difference}
+# Step 1: stack both strains into one pool of 14 values
+Y_all <- c(daphnia$Strain1, daphnia$Strain2)
+Y_all
+length(Y_all)
+
+# Step 2: draw 7 values at random, with replacement, for each fake strain
+RV1 <- sample(Y_all, size = 7, replace = TRUE)
+RV2 <- sample(Y_all, size = 7, replace = TRUE)   # same command again, new random draw
+RV1
+RV2
+
+# Step 3: the random difference in means
+mean(RV1)
+mean(RV2)
+RanDiff <- mean(RV1) - mean(RV2)
+RanDiff
+
+# Step 4: store it in a vector (a "column") for later
+RDvector <- RanDiff
+RDvector
 ```
 
-### Step 3 --- *(edit me)*
+*Your random difference will differ from the one printed here, and from your neighbour's, because each run draws a new random sample. Run the chunk again to see it change.*
 
-```{r step-3}
+# Run the chunk `one-random-difference` again to see the difference
 
+### Repeating the batch by hand
+
+*Handout: "In order to assign a probability to the observed difference we need to accumulate many values of RanDiff." Run the batch several times and watch the vector grow.*
+
+```{r accumulate-by-hand}
+RDvector <- c()       # start with an empty vector
+
+# Each pass through the batch adds one random difference. We run it 5 times
+for (run in 1:5) {
+  RV1 <- sample(Y_all, 7, TRUE)
+  RV2 <- sample(Y_all, 7, TRUE)
+  RanDiff <- mean(RV1) - mean(RV2)
+  RDvector <- c(RanDiff, RDvector)   # stack the new value onto RDvector
+}
+RDvector
 ```
 
-## Diagnostics / verification
+This works but is tedious: a real randomization test needs thousands of runs. That is what a *macro* is for.
 
-*(Residual plots, randomization overlays, homogeneity checks, or other
-verification appropriate to this lab's method. Primary tools this week:*
-`Base R (for/replicate loops); no external package required`*.)*
+## Part 4: the macro, 100 runs in one command
 
-```{r diagnostics}
+*Handout: "Define a sequence of commands; place into a file (a macro); execute the file a specified number of times." In R we can combine the whole batch into a single command with `replicate()`.*
 
+`replicate(n, expression)` evaluates the expression `n` times and collects the results into a vector. The expression here is "one random difference", exactly as built in Part 3.
+
+```{r macro-100-runs}
+# One command: 100 random differences
+RDvector <- c(replicate(100,mean(sample(Y_all, 7, TRUE)) - mean(sample(Y_all, 7, TRUE))))
+
+length(RDvector)       # N = 100 randomized differences
+round(head(RDvector, 10), 3)   # the first ten of them (rounded for display)
 ```
 
-## Exercises
+## Part 5: display the distribution
 
-Work through the following and show your code and output for each.
+*Handout: "Display the distribution": a well-labelled histogram of the 100 random differences.* The handout code first, then a version that also marks the observed difference.
 
-1. *(exercise 1 --- edit me)*
-2. *(exercise 2 --- edit me)*
-3. *(exercise 3 --- edit me)*
+```{r histogram-handout, fig.cap="Figure 1. Randomized difference in mean age of first reproduction in two strains of Daphnia longispina."}
+hist(RDvector, breaks = 15,
+     xlab = "randomized difference",
+     main = "Figure 1. Randomized difference in mean age of first reproduction in two strains of Daphnia longispina.",
+     cex.main = 0.8)
+```
 
-## Submission questions
+```{r histogram-marked, fig.cap="The same histogram with the observed difference and its mirror image marked."}
+hist(RDvector, breaks = 15,
+     xlab = "randomized difference in means (days)",
+     ylab = "frequency (number of runs)",
+     main = "Randomization distribution, 100 runs",
+     sub = "dashed lines: observed difference, + and -",
+     col = "grey85", border = "white")
+abline(v = c(-abs(k3), abs(k3)), col = "firebrick", lwd = 2, lty = 2)
+```
 
-Answer in complete sentences below each question. These responses, together
-with your code above, are graded against this lab's key deliverable:
-**Custom simulation loops in R**.
+**Read the plot and make a statement on wether the difference is a matter of chance:**
 
-**Q1.** *(question --- edit me)*
+## Part 6: from the histogram to a p-value
 
-> *(your answer here)*
+Once we have a distribution, we can use it to calculate the probability of AvDiff, our observed statistic (St = -0.04286). We will use a two-tailed test
 
-**Q2.** *(question --- edit me)*
+*Handout: "We will use a two-tailed test to calculate the probability of AvDiff, our observed statistic (St = -0.04286). We count the number of values in both tails, the left tail N(X <= St) and the right tail N(X >= St). We add the tails to obtain the proportion in both tails of the distribution."*
 
-> *(your answer here)*
+Why two tails? At the outset we had no idea whether Strain 1 would reproduce earlier or later than Strain 2, so a difference as extreme in *either* direction counts against the null hypothesis.
 
-**Q3.** *(question --- edit me)*
+```{r sort-and-count}
+# Smallest to largest (rounded the values for display)
+round(sort(RDvector), 3)
+# count in from each end towards -0.043 / +0.043
+length(RDvector)     # N
+k3                   # the observed difference, AvDiff
+```
 
-> *(your answer here)*
+*Handout: "Use your package to compute N, n_neg, n_pos."*
 
-## Submission checklist
+```{r tail-counts}
+N <- length(RDvector)                 # N = number of randomized differences
 
-- [ ] Code chunks all run top-to-bottom without error (Knit ▸ Knit to HTML)
-- [ ] All placeholder text above has been replaced
-- [ ] Submission questions answered in full sentences
-- [ ] File renamed / submitted per course LMS instructions
+summary(RDvector < (-abs(k3)))   # lower tail: TRUE = number of values below
+summary(RDvector > (abs(k3)))    # upper tail
 
----
+# Floating-point numbers can differ in the 15th decimal place, so a value that
+# "equals" the observed difference may not compare as equal. A tiny tolerance
+# makes "as extreme as or more extreme than" work properly.
+tol <- 1e-8
+
+RDvector <= -abs(k3)
+RDvector <= -abs(k3) + tol
+n_neg <- sum(RDvector <= -abs(k3) + tol)   # as negative as -|AvDiff|, or more
+n_pos <- sum(RDvector >=  abs(k3) - tol)   # as positive as +|AvDiff|, or more
+
+N
+n_neg
+n_pos
+```
+
+*Handout: "Now compute the p-value for the observed outcome."*
+
+```{r p-value}
+pct_neg <- n_neg / N                # % of outcomes at or below -0.043
+pct_pos <- n_pos / N                # % of outcomes at or above +0.043
+p_value <- (n_neg + n_pos) / N      # two-tailed randomization p-value
+
+pct_neg
+pct_pos
+p_value
+```
+
+**Answer:** 
+n_neg/N = , 
+n_pos/N = , 
+So the two-tailed p-value is ** ? **.
+
+Your numbers will differ a little from run to run, but they should land around 0.9. This is the estimate of the Type I error (the p-value) under the null hypothesis that the true difference is zero: about nine times in ten, shuffling the data gives a difference at least this large. There is **no evidence** that the two strains differ in age at first reproduction.
+
+### Check against the F-distribution
+
+Using the F-distribution to test whether the two strains differ in age at first reproduction
+
+*Null hypothesis: the two strains have the same age at first reproduction*
+
+*Handout: "It turns out that assumption free p-values by randomization in this example are close to the value (p = 0.908) calculated from the F-distribution with 1 and 12 degrees of freedom (F = 0.014)."*
+
+```{r f-check}
+pf(0.014, 1, 12, lower.tail = FALSE)  
+# 1 is df1, the number of groups - 1
+# 12 is the df2, total observation - 2
+# the handout's command
+# 0.014 is the F-ratio. This will be explained later
+
+# pf() calculate a p-value to test wether the 2 strain 
+
+# The same test done exactly (a two-sample t-test with equal variances; F = t^2):
+t.test(daphnia$Strain1, daphnia$Strain2, var.equal = TRUE)
+```
+
+
+The calculation of this F-ratio (F1,12 = 0.014) will be explained later in the course, as will the assumptions for using the cdf.
+
+```{r two-sample-t-test}
+# The same test done exactly (a two-sample t-test with equal variances; F = t^2):
+# Look at the data by strain first 
+daphnia$Strain1
+daphnia$Strain2
+
+# T-test on the 2 samples
+t.test(daphnia$Strain1, daphnia$Strain2, var.equal = TRUE)
+# Find the p-value and compare with the F and Randomization approach
+```
+
+The randomization p-value (about 0.9) and the F-distribution p-value (0.908) agree closely, even though the randomization made no assumption about normal or homogeneous errors.
+
+## The p-value is itself random (so how many runs are enough?)
+
+We only did 100 runs "so that we can see what we are doing". The cost of that is that the p-value changes from run to run. Repeat the whole 100-run test eight times, then eight times with 10,000 runs each:
+
+```{r p-value-noise}
+one_test <- function(nruns) {
+  rd <- replicate(nruns, mean(sample(Y_all, 7, TRUE)) - mean(sample(Y_all, 7, TRUE)))
+  mean(abs(rd) >= abs(k3) - tol) 
+  # two-tailed p-value 
+  # mean(abs(rd) >= abs(k3) - tol) is simply counting mean differences <= -k3 and >= k3 (we did this in the previous session). Then calculate the frequency
+  # n_neg <- sum(rd <= -abs(k3) + tol)
+  # n_pos <- sum(rd >= abs(k3) - tol)
+  # (n_neg + n_pos) / N	is exactly mean(abs(rd) >= abs(k3) - tol) = p-value
+}
+
+round(replicate(8, one_test(100)), 2)      # 100 runs
+round(replicate(8, one_test(10000)), 3)    # 10,000 runs
+```
+
+With 100 runs the p-value moves around by a few hundredths; with 10,000 it barely moves. The conclusion (p is large) is the same, but if a p-value sat close to 0.05 the difference would matter.
+
+
+## Write-up, question 2: guinea-pig litter size
+
+*Handout: "Carry out a randomization test for data in Box 13.12 of Sokal and Rohlf (1995), which shows mean litter size of two strains of guinea pig, compared over 9 years. Assign a symbol to your statistic (difference of means). State the observed value of your statistic. Report your assumption-free p-value via randomization. Make a frequency distribution of at least 200 randomized outcomes, and label both axes."*
+
+The data (average litter size in strains B and 13, from Sewall Wright's colony, 1916-1924) are in the course file `LitterSize.txt`
+
+```{r litter-import}
+# Load the LitterSize.txt file in R
+# 1. Find the online location or computer location of the file. filelocation3 <- "location of the file" 
+#filelocation3 <- ""
+
+filelocation3 <- "https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/main/Data/Labs/DaphniaAges.txt"
+
+litter <- read.table(filelocation3, nrows = 7, header = FALSE)
+names(litter) <- c("StrainB", "Strain13")
+
+# The correct code is below, because litter has 3 columns and the 3rd column is Year
+# 2. Find the correct nrows = 
+# 3. names(litter) <-  c("StrainB", "Strain13", "Year")
+
+# 4. Look at the data by strain
+litter$StrainB
+litter$Strain13
+```
+
+**Step 1, the statistic.** Use the same statistic as the Daphnia example, the difference of means: $\Delta\bar{Y} = \bar{Y}_B - \bar{Y}_{13}$.
+
+```{r litter-observed-stratistics}
+# Use litter$StrainB and litter$Strain13 to calculate the mean by group and mean difference
+k1 <- mean(daphnia$Strain1)   # Average litter size in guinea pigs, Strain B
+k2 <- mean(daphnia$Strain2)   # Average litter size in guinea pigs, Strain 13
+k3 <- k1 - k2                 # AvDiff = mean(Y1) - mean(Y2)
+
+k1
+k2
+k3
+```
+
+**Steps 2 to 5, the randomization.** The pool has 18 values; each fake group gets 9 (the number of years). We use 200 runs.
+
+```{r litter-randomization}
+# 1. Pool the 18 values together
+Y_litter <- c(litter$StrainB, litter$Strain13)   # pool of 18 values
+length(Y_litter)
+
+# 2. Change the 7 to the correct number of observation for litter
+# mean(sample(Y_litter, , TRUE)
+
+# 3. Change the number of replicates to 200 
+# Make 200 randomized outcomes
+RD_litter <- replicate(100,
+                       mean(sample(Y_litter, 7, TRUE)) -
+                       mean(sample(Y_litter, 7, TRUE)))
+length(RD_litter)
+```
+
+```{r litter-histogram, fig.cap="Randomized difference in mean litter size of guinea-pig strains B and 13 (200 runs)."}
+hist(RD_litter, breaks = 20,
+     xlab = "Your x-axis label",
+     ylab = "frequency (number of runs)",
+     main = "Give a Title to your plot",
+     sub = "dashed lines: observed difference, + and -",
+     col = "grey85", border = "white")
+abline(v = c(-abs(k3), abs(k3)), col = "firebrick", lwd = 2, lty = 2)
+```
+
+**Step 6, the p-value.**
+
+```{r litter-p-value}
+n_neg_L <- sum(RD_litter <= -abs(k3) + tol)
+n_pos_L <- sum(RD_litter >=  abs(k3) - tol)
+p_litter <- (n_neg_L + n_pos_L) / length(RD_litter)
+
+n_neg_L
+n_pos_L
+p_litter
+```
+
+**Answer for the handout blanks:**
+
+- Symbol for the statistic: $\Delta\bar{Y} = \bar{Y}_B - \bar{Y}_{13}$.
+
+- Observed value: $\Delta\bar{Y}$ = NA
+
+- Report your assumption-free p-value via randomization
+
+
+```{r litter-save-pdf, eval=FALSE}
+pdf("Lab4_LitterSize_randomization.pdf", width = 7, height = 5)
+hist(RD_litter, breaks = 20,
+     xlab = "randomized difference in mean litter size (strain B - strain 13)",
+     ylab = "frequency (number of runs)",
+     main = "Randomization distribution, 1,000 runs")
+abline(v = c(-abs(k3), abs(k3)), col = "red", lwd = 2, lty = 2)
+dev.off()
+```
+
+## Wrap-up
+
+- [ ] Flow diagram (Table 4.1) discussed *before* any code was run
+- [ ] Ran the one-random-difference chunk several times and saw it change
+- [ ] 100-run macro run live; histogram displayed with the observed difference marked
+- [ ] Count `n_neg`, `n_pos`, N and compute p-value
+- [ ] Guinea-pig test: statistic symbol, observed value, p-value, labelled histogram of at least 200 runs
 
 ```{r session-info}
 sessionInfo()

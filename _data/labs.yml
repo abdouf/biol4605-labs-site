@@ -116,7 +116,7 @@ labs:
     software: "Base R (for/replicate loops); no external package required"
     rmd_file: "rmd/lab04-probability-values-randomization.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
+    downloadable: true
 
   - week: 5
     week_padded: "05"

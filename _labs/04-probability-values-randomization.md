@@ -18,6 +18,19 @@ Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 **Key deliverable:** Custom simulation loops in R
 **Software / functions:** `Base R (for/replicate loops); no external package required`
 
+## Lab materials (instructions)
+
+This lab's instructions and exercises are Dr. David C. Schneider's original
+**"Probability Values by Randomization "** lab, unchanged from his site:
+
+[Open Lab 4 (PDF) on Dr. Schneider's site ↗](https://davidcschneider.github.io/StatisticalScience/Labs/Lab04.pdf){:target="_blank" .btn .btn-outline }
+
+## Lab materials (Data)
+
+[Open Daphnia Data (Box 9.5 in Sokal and Rohlf 1995) on Dr. Schneider's site ↗](https://github.com/DavidCSchneider/StatisticalScience/blob/main/Data/Labs/DaphniaAges.txt){:target="_blank" .btn .btn-outline }
+
+[Open Guinea Pig Data (Box 13.12 of Sokal and Rohlf (1995) on Dr. Schneider's site ↗](https://github.com/DavidCSchneider/StatisticalScience/blob/main/Data/Labs/LitterSize.txt){:target="_blank" .btn .btn-outline }
+
 ## Starter file
 
 {% assign this_lab = site.data.labs.labs | where: "week", 4 | first %}

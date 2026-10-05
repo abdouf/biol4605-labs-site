@@ -55,7 +55,7 @@ p^2        # probability of Heads on 2 successive (independent) tosses
 
 ```{r ex1-four-heads}
 # write the code to answer the question
-
+p^4
 ```
 
 *Handout: card draws without replacement — probability of 2 successive diamonds from a 52-card deck.*
@@ -64,13 +64,13 @@ p^2        # probability of Heads on 2 successive (independent) tosses
 # P(diamond on the first draw)
 # How many diamonds in total in a card deck?
 # Ace, 2 through 10, Jack, Queen, and King (n/total cards)
-p_diamond_1 <- NA/NA
+p_diamond_1 <- 13/52
 
 # How many diamonds remain after removing one?
-diamonds_remaining <- NA
+diamonds_remaining <- 12
 
 # How many cards remain after removing one?
-cards_remaining <- NA
+cards_remaining <- 51
 
 # What is the probability of another diamond?
 # This is called a conditional probability
@@ -100,7 +100,7 @@ What is the probability that an untrained planarian worm will correctly guess wh
 # find p, which is 1 correct guess then p^n
 # write your math
 
-0.3^10
+0.5^6
 
 # The general binomial pdf, via R's built-in function:
 # Find what the function does by running ?dbinom in the console
@@ -265,7 +265,7 @@ Can a planarian worm learn to avoid endpoint D? In a maze with 2 levels (Left ri
 
 Write the answer below 
 
-$\pi = ?$
+$\pi = 0.25$
 
 *What is the chance of never arriving at D in 6 trials? f0*
 
@@ -278,17 +278,18 @@ We need to add the probability of no arrivals (f0) and the probability of arrivi
 
 ```{r ex5-by-hand}
 # write the code to compute f0
-
+f0 <- dbinom(x=0, size = 6, prob = 0.25)
 # write the code to compute f1 
-
+f1 <- dbinom(1, size = 6, prob = 0.25)
 # write the code to compute $Pr{x <= 1}$
+Pr_x_le_1 <- f0+f1
 ```
 
 
 ```{r ex5-cdf-function}
 # The cumulative distribution function does the summing for us:
 # Find the function and the code for doing it
-
+pbinom(1, size = 6, prob = 0.25)   # should match Pr_x_le_1 above exactly
 ```
 
 *Handout: build the full pdf-and-cdf table, x = 0..6.*
@@ -381,10 +382,9 @@ Compute $Pr\{X > 4\}$ two ways: (1) by summing the pdf's upper tail, and via (2)
 
 ```{r ex6-upper-tail}
 # Write the code for probability of 5 success in 6 trials with probability by trial being prob = 0.25 (f5)
-f5 <- dbinom(NA, size = NA, prob = NA)
+f5 <- dbinom(5, size = 6, prob = 0.25)
 # Write the code for probability of 6 success in 6 trials with probability by trial being prob = 0.25 (f6)
-
-f6 <- dbinom(NA, size = NA, prob = NA)
+f6 <- dbinom(6, size = 6, prob = 0.25)
 
 f5
 f6
@@ -394,11 +394,11 @@ Pr_X_gt_4_pdf <- f5 + f6
 Pr_X_gt_4_pdf
 
 # Method 2: use the cdf, which is faster once n gets large
-Pr_X_gt_4_cdf <- 1 - pbinom(NA, size = NA, prob = NA)
+Pr_X_gt_4_cdf <- 1 - pbinom(4, size = 6, prob = 0.25)
 Pr_X_gt_4_cdf
 
 # Confirm the two methods agree
-all.equal(Pr_X_gt_4_pdf, Pr_X_gt_4_cdf)
+# all.equal(Pr_X_gt_4_pdf, Pr_X_gt_4_cdf)
 ```
 
 ## Exercise 7: a harder maze, and comparing experimental designs
@@ -409,7 +409,7 @@ all.equal(Pr_X_gt_4_pdf, Pr_X_gt_4_cdf)
 
 (2) What is the expected arrive rate at H by chance on each run through the maze?
 
-$p_H = NA$
+$p_H =1/8$
 
 (3) What is the chance of 4 correct arrivals at H in 4 trials? ($Pr\{X=4\}$)
 
@@ -418,16 +418,16 @@ $p_H = NA$
 (4) Compare this design against the 2-tier/6-trial design from Exercises 5-6.*
 
 ```{r ex7-three-tier-maze}
-p_H <- NA          
+p_H <- 1/8          
 # expected arrival rate at H by chance, one of 8 endpoints
 p_H
 
 # write the code for the chance of 4 correct arrivals at H in 4 trials? ($Pr\{X=4\}$)
-Pr_X_eq_4 <- dbinom(NA, size = NA, prob = p_H)
+Pr_X_eq_4 <- dbinom(4, size = 4, prob = 1/8)
 Pr_X_eq_4
 
 # write the code for the chance of 3 or more correct in 4 trials ($Pr\{X>2\}$)
-Pr_X_gt_2 <- 1 - pbinom(NA, size = 4, prob = p_H)
+Pr_X_gt_2 <- 1 - pbinom(2, size = 4, prob = 1/8)
 Pr_X_gt_2
 ```
 
@@ -451,7 +451,7 @@ x2_crit
 # 3-tier maze: n = 4 trials, p = 1/8
 x3 <- 0:4
 # Calculate the probability of getting strictly more than $x_3$ successes out of 4 trials
-upper_tail_3tier <- 1 - pbinom(x3, size = 4, prob = p_H)
+upper_tail_3tier <- 1 - pbinom(x3, size = 4, prob = 1/8)
 
 # Put the successes and the probabilities together in a dataframe
 data.frame(x = x3, `Pr{X>x}` = round(upper_tail_3tier, 4), check.names = FALSE)
@@ -463,9 +463,9 @@ x3_crit
 # smallest x where the 3-tier maze crosses below 5%
 ```
 
-**Model answer:** the 2-tier maze needs $x=?$ (out of 6 trials) to fall below the 5% criterion; the 3-tier maze needs only $x=?$ (out of 4 trials).
+**Model answer:** the 2-tier maze needs $x=3$ (out of 6 trials) to fall below the 5% criterion; the 3-tier maze needs only $x=2$ (out of 4 trials).
 
-The n-tier maze is the more efficient design. It reaches statistical significance with fewer trials
+The 3-tier maze is the more efficient design. It reaches statistical significance with fewer trials, because chance performance is a smaller target (1/8 vs. 1/4) to begin with.
 
 ## Exercise 8: the chi-squared distribution and the G-statistic
 
@@ -597,7 +597,6 @@ par(mfrow = c(1, 1))
 
 (1) the cdf climbs very fast over the first unit or two then flattens out slowly across a long right tail.
 
-(2) What else?
 
 ## Exercise 10: the t-distribution
 
@@ -692,6 +691,7 @@ qchisq(0.95, df = 1)   # should return ~3.84, matching Exercise 8's trial run
 
 ```{r ex14-extreme-chisq}
 qchisq(1 - 0.0001, df = 1)
+# qchisq(1 - alpha, df = 1)
 ```
 
 *Handout: Table 3.1 — critical t-values at unusual alpha levels (0.002 and 0.0002), for df = 1, 5, 10. The handout's own worked row (df = 1) is given as a check: 159.156 and 1590.*
