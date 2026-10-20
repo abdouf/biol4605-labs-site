@@ -33,7 +33,7 @@ This lab's instructions and exercises are Dr. David C. Schneider's original
 
 {% assign this_lab = site.data.labs.labs | where: "week", 5 | first %}
 {% if this_lab.downloadable %}
- [Download lab05a-glm-simple-regression.Rmd]({{ '/rmd/lab05a-glm-simple-regression.Rmd' | relative_url }}){: .btn .btn-blue }
+ [Download lab05a-glm-simple-regression.Rmd]({{ '/rmd/lab05-glm-simple-regression.Rmd' | relative_url }}){: .btn .btn-blue }
 
  Open it in RStudio and knit to HTML (or PDF) to confirm it runs before
  editing.
