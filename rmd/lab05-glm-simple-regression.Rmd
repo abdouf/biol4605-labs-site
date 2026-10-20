@@ -1,0 +1,626 @@
+---
+title: "Lab 5. The General Linear Model: Regression (starter code)"
+subtitle: "BIOL/OCSC 4605 / 7220 - worked walk-through in base R"
+author: "Your name here"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    df_print: paged
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: false
+fontsize: 11pt
+geometry: margin=1in
+---
+
+```{r setup, include=FALSE}
+# Global chunk options: show the code (echo), keep figures a sensible size.
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center", fig.width = 6, fig.height = 4)
+options(digits = 5)   # print 5 significant digits by default
+```
+
+# How to use this file
+
+This file follows the Lab 5 handout step by step. Each section reproduces the
+handout's code, **fills in the blanks** (the numbers and "yes/no" answers the
+handout leaves empty) and adds comments explaining what each function does.
+
+* Put `TriboliumWeights.txt` and `TriboliumSurvival.csv` in the **same folder** as this `.Rmd`.
+  (If the files are not found, the data are typed in below so the file still knits.)
+* Run chunk by chunk (green arrow) while following the handout, or press **Knit**.
+* Everything is **base R**: no packages need to be installed.
+
+1. Define the response (Y) and explanatory (X) variables
+2. Write the model
+3. Define the data set
+4. Run the analysis (parameters, fitted values, residuals)
+5. Save residuals and fitted values
+6. Plot residuals vs fitted values (is the straight line adequate?)
+7. Revise the model if it is not
+8. Check residuals for homogeneity, independence and normality
+
+# Write-up for Analysis #1 (handout p. 11, items A-F)
+
+* **A. Model and hypotheses.** 
+  
+* **B. ANOVA table with F-statistic.**
+
+* **C. Residual vs fit plot.** Figure 2, this is Assumption 1. A straight-line model is appropriate
+
+* **D. Assumptions.** 
+Homogeneous (Figure 2)
+
+independent (Figure 3 Lag Plot)
+
+approximately normal with Histogram (Figure 4) and the normal probability plot)
+
+* **E. Decision.** Report decision about H0, reject or not rejected, with report of statistic, n, and p-value.
+
+* **F. Effect size.** Use $\hat\beta$ and make a statement about the relationship between X and Y 
+
+# Analysis 1. *Tribolium* weight loss in relation to humidity (regression routine)
+
+**Research questions.** Does weight loss in the flour beetle *Tribolium* depend on humidity?
+
+If so, what is the rate of weight loss in relation to humidity?
+
+## Step 1-2. Variables and model
+
+| Variable         | Symbol | Units | Type  | Role        |
+|------------------|--------|-------|-------|-------------|
+| Weight loss      | WLoss  | mg    | ratio | Response    |
+| Percent humidity | PctH   | %     | ratio | Explanatory |
+
+The model (both variables are ratio-scale, so this is a regression):
+
+$$\mathit{WLoss} = \beta_0 + \beta \, \mathit{PctH} + \epsilon_{normal}$$
+
+where $\beta_0$ is the grand mean, $\beta$ the slope and $\epsilon_{normal}$ the normal error.
+R reports the equivalent slope-intercept form $\mathit{WLoss} = \alpha + \beta \, \mathit{PctH} + \epsilon_{normal}$,
+with $\alpha$ the Y-intercept.
+
+## Step 3. Define the data from file
+
+The text file has no column names, two numbers per line (weight loss, then humidity) and a few
+lines of notes at the bottom. `nrows = 9` tells R to read only the nine data lines.
+
+```{r import-weights}
+# SET THE PATH TO THE DATA
+TriboliumWeights <- read.table("/TriboliumWeights.txt", nrows = 9)      # read the 9 data lines
+names(TriboliumWeights) <- c("WLoss", "PctH")   # label the columns (handout)
+TriboliumWeights
+str(TriboliumWeights)                          # check: 9 obs., 2 numeric variables
+```
+
+## Step 4. Plot the data first
+
+Always look at the data before fitting anything.
+
+```{r fig1, fig.cap="Tribolium weight loss relative to humidity (data: Sokal and Rohlf, Box 14.1). Scatterplot."}
+with(TriboliumWeights,
+     plot(PctH, WLoss,
+          xlab = "Relative humidity (%)",
+          ylab = "Weight loss (mg)",
+          main = "Figure 1. Tribolium weight loss relative to humidity"))
+```
+
+The points fall close to a descending straight line: a regression is reasonable.
+
+## Step 5. Run the regression and save residuals and fits
+
+```{r lm-weights}
+Wtmod <- lm(WLoss ~ PctH, data = TriboliumWeights)   # lm = linear model; formula: Y ~ X
+
+res1 <- resid(Wtmod)    # residuals = observed Y - fitted Y
+fit1 <- fitted(Wtmod)   # fitted values (Y-hat), the points on the line
+
+round(cbind(PctH = TriboliumWeights$PctH, observed = TriboliumWeights$WLoss,
+            fitted = fit1, residual = res1), 3)
+```
+
+Residual = observed minus fitted, so each residual is the vertical distance from a point to the line.
+
+## Assumption 1. A straight-line model is appropriate
+
+Plot residuals against fitted values. Curves would mean a straight line is the wrong structural model.
+
+```{r fig2, fig.cap="Tribolium weight loss residual vs fit plot."}
+plot(fit1, res1,
+     ylab = "residuals",
+     xlab = "fitted values",
+     main = "Figure 2. Tribolium weight loss residual vs fit plot")
+abline(h = 0, lty = 2)    # reference line at zero
+```
+
+**Answer.** With only 9 points the scatter is irregular but there is no NON-LINEARITY.
+Assumption 1 is met.
+
+
+## Parameter estimates and the ANOVA table
+
+```{r summary-weights}
+summary.lm(Wtmod)   # estimates, standard errors, t-tests, r-squared, F-test
+anova(Wtmod)        # the ANOVA table (SS, df, MS, F, p)
+```
+
+
+In basic terms, an ANOVA table tells you whether your explanatory variables account for a meaningful amount of variation in your outcome compared to random chance.
+
+(1) Sums of Squares (Sum Sq): Breaks total variability into two parts:
+
+    - Model line (PctH): The amount of variation explained by your factor (23.51).
+
+    - Residuals: The leftover variation (unexplained noise/error) (0.616).
+
+(2) Mean Squares (Mean Sq): The variation per degree of freedom (Sum Sq divided by Df). It gives an "average" scale for both the explained signal and unexplained noise.
+
+(3) F value: The ratio of explained variance to unexplained noise ($\frac{23.51449}{0.088009} = 267.18$). A high $F$-value means the signal is far stronger than the background noise.
+
+(4) p-value: The probability that an $F$-value this large happened purely by random luck. Here, $7.8 \times 10^{-7}$ (0.00000078) is extremely small.
+
+
+Pull the numbers we need out of the model object so nothing is typed by hand:
+
+```{r pull-numbers}
+coef(Wtmod) # Model coefficients
+alpha_hat <- unname(coef(Wtmod)[1])   # Estimated intercept
+beta_hat <- unname(coef(Wtmod)[2])   # Estimated slope
+r2 <- summary(Wtmod)$r.squared # R2
+n <- nrow(TriboliumWeights) # Total observations
+Fval <- anova(Wtmod)$"F value"[1] # what is it?
+pval <- anova(Wtmod)$"Pr(>F)"[1] # what is it?
+```
+
+**Structural model:** $\hat{Y} = \alpha + \beta_x X$
+
+**Write the Regression equation with the estimated parameters:**
+
+- write $\hat\alpha$ value
+- write $\hat\beta$ value
+- add X 
+This is exactly the structural model but with the actual parameter values
+
+$$\mathit{WLoss} = $$
+
+### The intercept by hand
+
+The package reports slope-intercept form. It starts from the grand mean $\beta_0 = \bar{Y}$ and
+the fact that the line passes through $(\bar{X}, \bar{Y})$:
+
+$$\alpha = \beta_0 - \beta_x \bar{X}$$
+
+```{r intercept-by-hand}
+Ybar <- mean(TriboliumWeights$WLoss)     # beta_0, the grand mean of Y
+Xbar <- mean(TriboliumWeights$PctH)      # mean of X
+alpha_by_hand <- Ybar - beta_hat * Xbar  # alpha = Ybar - beta * Xbar
+
+c(Ybar = Ybar, Xbar = Xbar, alpha = alpha_by_hand)
+all.equal(alpha_by_hand, alpha_hat)      # check if the calculated intercept matches lm()'s intercept
+```
+
+## Assumption 2a. Homogeneous residuals
+
+This is the most important assumption. Violations of this assumption will have the greatest biasing effect estimates of parameters and on the p-value. This assumption is checked by going back to the residual vs. fit plot (Figure 2). We look at this graph in a new way. 
+**- Do we see strong differences in vertical spread, from left to right in the plot?**
+**- Do you see any strong deviations from a homogeneous band in the residual vs fit plot for the Tribolium data ? (answer here )**
+
+The most important assumption. Go back to Figure 2: is there a strong change in vertical spread
+from left to right?
+
+## Assumption 2b. Residuals sum to zero
+
+```{r sum-zero}
+sum(res1)    # sum of errors ~> 0
+
+# Illustrate each vertical distance from a point to the line
+plot(fit1, res1,
+     ylab = "residuals",
+     xlab = "fitted values",
+     main = "Figure 2. Tribolium weight loss residual vs fit plot")
+abline(h = 0, lty = 2)
+segments(x0 = fit1, y0 = 0, x1 = fit1, y1 = res1, col = "gray", lty = 3)
+```
+
+## Assumption 2c. Independent residuals
+
+One way to check the independence assumption is to plot the errors in the order in which the data were collected. Another way is to plot each residual against neighboring values in space.
+
+Plot each residual against the previous one in the data order (**This is called a lag plot**). A trend would suggest neighbouring observations are related.
+
+```{r fig3, fig.cap="Lag plot. Tribolium weight loss residuals."}
+lag.plot(res1,
+         main = "Figure 3. Lag plot. Tribolium weight loss residuals",
+         diag = FALSE, do.lines = FALSE)
+```
+
+**Answer.** Any trend that you notice ? Are the residuals independent.
+
+## Assumption 2d. Normal residuals checked with a histogram
+
+### Histogram (9 classes, then 5 classes)
+
+A symmetric bell shape centred on zero is expected. If the normality assumption is met the residuals will cluster symmetrically around their mean (zero). If the assumption is not met the histogram will deviate substantially from a bell-shaped curve. Find the histogram routine in your package and check this assumption now.
+
+A single number in `breaks` is only a *suggestion* to R (it rounds to "pretty" class limits: asking for 9 gives 10 classes). To get exactly 5 classes centred on zero we give the class limits ourselves.
+
+```{r fig4, fig.cap="Tribolium weight loss residuals: histograms with 9 and 5 classes.", fig.height=3.6}
+par(mfrow = c(1, 2))
+hist(res1, breaks = 9, xlab = "residuals", ylab = "frequency",
+     main = "Figure 4a. breaks = 9")
+hist(res1, breaks = seq(-0.5, 0.5, length.out = 6),   # 5 classes of width 0.2
+     xlab = "residuals", ylab = "frequency",
+     main = "Figure 4b. 5 classes")
+par(mfrow = c(1, 1))
+```
+
+
+**Box on p. 5 (describe the differences in 9 vs 5 classes histogram).** With 9 (really 10) classes the 9 residuals are scattered over many narrow classes, with gaps and a ragged outline, so it is hard to see any shape. With 5 classes (an odd number, so one class is centred on zero) most residuals (5 of 9) fall in the central class, with single residuals in the tails, which looks more bell-shaped, although one class next to
+the centre is empty. The impression depends strongly on the number of classes when there are few residuals, so a histogram alone cannot settle the question.
+
+### Normal probability plot
+
+We can check the normality error assumption by comparing the cumulative distribution of the residuals to the cumulative distribution of the normal distribution, which is sigmoid (S-shaped). 
+Normal residuals fall on the diagonally rising straight line, while non-normal residuals will deviate from the line. 
+
+```{r fig5, fig.cap="Normal probability plot of the Tribolium weight loss residuals."}
+qqnorm(res1, main = "Normal probability plot, Tribolium residuals")
+qqline(res1)    # adds the reference diagonal
+```
+
+**Answer.** Some deviation from the line: too many residuals sit near zero and a few are
+large at both ends. The deviation is modest for n = 9 and we proceed.
+
+**Should we use a hypothesis test to check normality?** NO. With a large sample a test flags trivial deviations; with a small sample it misses large ones. Use the plots.
+
+**References:**
+Johnson, D.H. 1999. The insignificance of statistical significance testing. Journal of Wildlife Management 63:763-772
+
+Läärä, E. 2009. Statistics: reasoning on uncertainty, and the insignificance of testing null. —
+Ann. Zool. Fennici 46: 138–157.
+
+## Evidential strength and effect size (Evidence for the model with the parameter $\hat\beta = − 0.05$ compared to a model with $\hat\beta = 0$)
+
+The likelihood ratio (LR) compares the fitted model (slope $\hat\beta$) with a model with slope
+$\beta = 0$. It is computed from $r^2$ and the sample size $n$:
+
+$$LR = (1 - r^2)^{-n/2}$$
+```{r LR-weights}
+LR_weights <- (1 - r2^2)^{-n/2}
+c(r_squared = r2, n = n, LR = LR_weights)
+format(LR_weights, scientific = TRUE, digits = 3)
+```
+
+**Effect size:** The estimated effect size was $\hat\beta = −0.053$ mg per 1% change in humidity. This slope is about $10^8$ times more likely than a slope of $\hat\beta = 0$.
+
+## Inference from the likelihood ratio (the F-test)
+
+Hypothesis testing uses the likelihood ratio to make a decision about the null hypothesis, no change. Is hypothesis testing appropriate? In this example we have an experiment from a lab where beetle cultures were maintained in controlled temperature chambers. The experiment could have been repeated many times under nearly identical conditions. The population (target of inference) was a potentially large number of repeats, large enough to allow appeal to the law of large numbers and the normal distribution. The probability of the estimated slope of $\hat\beta = −0.053$ under conditions of fixed humidity (PctH fixed, hence $\hat\beta = 0$) is calculated from the F-statistic, which in turn is based on the LR. From the regression routine output we see an F-ratio of 367, an extremely improbable result ($p = 5.7 x 10^-8$) that we reject at the 5% criterion. **When we use hypothesis testing we are restricted to a statement of rejection of the H0. We cannot “accept the alternative” having rejected H0**. We cannot say we accept HA when H0 is not rejected. And we cannot even say we accept the H0 when it is not rejected. If we want to say something about the alternative hypothesis, we use a likelihood ratio.
+
+
+```{r F-weights}
+c(F = Fval, df1 = 1, df2 = n - 2, p = pval)
+```
+
+**Look at the statistics and make a statement about $H_0$**
+
+
+### Do we need to recompute the p-value by randomization?
+
+The residuals showed some deviation from normality, but the p-value is **far** from the 5% criterion
+(by many orders of magnitude). A better p-value would not change the decision, so we do not repeat
+the randomization (Lab 4 method) here. We reject $H_0$: weight loss depends on humidity.
+
+## Write-up for Analysis #1 (handout p. 11, items A-F)
+
+* **A. Model and hypotheses.** 
+Copy the chunk and paste here
+
+The equation: 
+
+$H_0$ statement: 
+$H_A$ statement:
+  
+* **B. ANOVA table with F-statistic.**
+
+Copy the chunk and paste here
+
+* **C. Residual vs fit plot.** Figure 2, this is Assumption 1. A straight-line model is appropriate
+
+Copy the chunk and paste here
+
+* **D. Assumptions.** 
+Homogeneous (Figure 2)
+
+independent (Figure 3)
+
+approximately normal: Histogram (Figure 4) and the normal probability plot
+
+* **E. Decision.** Report decision about H0, reject or not rejected, with report of statistic, n, and p-value.
+
+* **F. Effect size.** $\hat\beta = −0.053$ mg per 1% humidity: 
+Write the statement with each 10% increase in relative humidity is associated with $?$ mg less weight loss.
+
+\newpage
+
+# Analysis 2. The same analysis with a GLM routine
+
+`lm()` already **is** a general linear model routine, so in R this analysis is the same one we
+just ran. For comparison, `glm()` fits a *generalized* linear model; with its default
+`family = gaussian` (normal errors) it gives the same fit.
+
+```{r glm-weights}
+Wtglm <- glm(WLoss ~ PctH, data = TriboliumWeights)   # default family = gaussian
+summary(Wtglm)
+anova(Wtglm, test = "F")    # test = "F" asks for an F-ratio like the lm() table
+```
+
+## Box 1 comparisons
+
+```{r box1}
+# (1) Y-intercept alpha and (2) slope beta_x: lm vs glm
+rbind(lm = coef(Wtmod), glm = coef(Wtglm))
+all.equal(coef(Wtmod), coef(Wtglm))
+
+# (3) ANOVA tables
+anova(Wtmod)
+anova(Wtglm, test = "F")
+```
+
+**Comments.**
+
+* The intercept and slope are **identical** (to rounding) in the two routines.
+* The ANOVA tables have the same F-ratio and p-value. The `glm` table is labelled in terms of
+  *deviance* (Deviance = Sum of Squares for a normal model, Resid. Dev = residual SS) and has
+  `Df`, whereas the `lm` table shows `Sum Sq`, `Mean Sq`, `F value`, `Pr(>F)`.
+* The regression routine is simpler (continuous X only) and reports $r^2$ directly.
+
+\newpage
+
+# Analysis 3. *Tribolium* survival in relation to egg density (GLM routine)
+
+Here there are **several Y values for each X value**. Question: does *Tribolium* survival depend on density?
+
+## Variables and model
+
+| Variable                    | Symbol | Units                       | Type  | Role        |
+|-----------------------------|--------|-----------------------------|-------|-------------|
+| Survival                    | PctS   | proportion (0 to 1)         | ratio | Response    |
+| Arcsin-transformed survival | asinS  | degrees                     | ratio | Response    |
+| Egg density                 | Eggs   | eggs (density; unit of area/volume as in the data description) | ratio | Explanatory |
+
+(PctS is a proportion between 0 and 1 in the file, not 0-100%. asinS is the arcsin transform of
+PctS in degrees. We check this relationship below.)
+
+Model for PctS in slope-intercept form:
+
+$$\mathit{PctS} = \alpha + \beta \, \mathit{Eggs} + \epsilon_{normal}$$
+
+## Define the data from file
+
+```{r import-survival}
+# SET THE PATH TO THE DATA
+TriboliumSurvival <- read.csv("/TriboliumSurvival.csv")    # first line = column names
+# Reorder and rename the columns to match the symbols in the handout
+TriboliumSurvival <- TriboliumSurvival[, c("PctS", "arcsinPctS", "EggDensity")]
+names(TriboliumSurvival) <- c("PctS", "asinS", "Eggs")
+
+TriboliumSurvival
+```
+
+How did R read each column? R tries `logical`, `integer`, `numeric`, `complex` in turn and
+falls back to `factor` only if none works.
+
+```{r str-survival}
+str(TriboliumSurvival)
+```
+
+Two variables are `num` and one (Eggs) was read as `int`. Nothing is a `factor`. For a regression
+`integer` is fine for the explanatory variable (Lab 6 introduces `as.factor()` and `as.numeric()`).
+
+Check that asinS really is the arcsin of PctS in degrees (`asin()` returns radians, so multiply by
+180/pi):
+
+```{r asin-check}
+max(abs(asin(TriboliumSurvival$PctS) * 180 / pi - TriboliumSurvival$asinS))  # about 0
+```
+
+## Plot the data
+
+```{r fig6, fig.cap="Tribolium survival (proportion) relative to egg density. Scatterplot.", fig.height=3.6}
+par(mfrow = c(1, 2))
+with(TriboliumSurvival, plot(Eggs, PctS, xlab = "Egg density",
+                             ylab = "Survival (proportion)", main = "Untransformed"))
+with(TriboliumSurvival, plot(Eggs, asinS, xlab = "Egg density",
+                             ylab = "Arcsin survival (degrees)", main = "Arcsin transformed"))
+par(mfrow = c(1, 1))
+```
+
+```{r lag-helper}
+# lag.plot() resets the plotting layout, so inside a 2 x 2 panel we draw the
+# same lag-1 plot by hand: residual i (x) against residual i+1 (y).
+lag1 <- function(r, main) {
+  plot(head(r, -1), tail(r, -1), xlab = "residual i", ylab = "residual i+1", main = main)
+}
+```
+
+## Run the GLM for untransformed survival (PctS)
+
+Use what you learned in Analysis #1 (same commands, new names).
+
+```{r glm-survival}
+Smod  <- lm(PctS ~ Eggs, data = TriboliumSurvival)    # Run GLM (lm is a GLM routine)
+res_S <- resid(Smod)
+fit_S <- fitted(Smod)
+
+summary(Smod)
+anova(Smod)
+```
+
+The regression equation is $\mathit{PctS} = 0.91357 - 0.001253 \; \mathit{Eggs}$,
+
+i.e. survival falls by about 1.253 percentage points for every extra 10 eggs of density.
+
+$abs(coef(Smod)[2]) * 10 * 100$
+
+### Diagnostics for untransformed survival (the four boxes on p. 9)
+
+```{r fig7, fig.cap="Untransformed survival (PctS): residual diagnostics.", fig.width=7, fig.height=6}
+par(mfrow = c(2, 2))
+
+# Model linear? and Residuals homogeneous?  -> residual vs fit
+plot(fit_S, res_S, xlab = "fitted values", ylab = "residuals",
+     main = "Untransformed: residual vs fit")
+abline(h = 0, lty = 2)
+
+# Residuals independent? -> lag plot
+lag.plot(res_S,
+         main = "Untransformed: lag plot",
+         diag = FALSE, do.lines = FALSE)
+
+# Residuals normal? -> histogram and normal probability plot
+hist(res_S, breaks = 5, xlab = "residuals", main = "Untransformed: histogram")
+qqnorm(res_S, main = "Untransformed: normal plot"); qqline(res_S)
+
+par(mfrow = c(1, 1))
+```
+**Questions:**
+For the analysis untransformed survival:
+Is the straight line assumption valid ? (any bowls or arches in residual vs fit plot?)
+Are the residuals homogeneous ? (No cones or other patterns in residual vs fit plot?)
+Are the residuals normal ? (use normal scores/qqplot)
+
+| Question                  | Answer for untransformed survival (PctS) |
+|---------------------------|------------------------------------------|
+| Model linear?             | Yes: no clear bowl or arch. |
+| Residuals homogeneous?    | **No**: the spread is uneven. The three points at density 50 sit almost on zero, while the points at the other densities scatter over about +/- 0.04. |
+| Residuals independent?    | Yes: no trend in the lag plot. |
+| Residuals normal?         | Yes, approximately: points follow the line in the normal probability plot, and the histogram is roughly bell-shaped. |
+
+
+**The response is a percentage, so non-normal residuals might be expected. Instead the residuals are about normal but not homogeneous.**
+
+## Redo with the arcsin-transformed survival
+
+For decades textbooks recommended the arcsin transformation for percentages. Did it help?
+
+```{r glm-asin}
+Amod  <- lm(asinS ~ Eggs, data = TriboliumSurvival)
+res_A <- resid(Amod)
+fit_A <- fitted(Amod)
+
+summary(Amod)
+anova(Amod)     # the ANOVA table of Box 14.4 (Sokal and Rohlf)
+```
+
+```{r fig8, fig.cap="Arcsin-transformed survival (asinS): residual diagnostics.", fig.width=7, fig.height=6}
+par(mfrow = c(2, 2))
+plot(fit_A, res_A, xlab = "fitted values", ylab = "residuals",
+     main = "Arcsin transformed: residual vs fit")
+abline(h = 0, lty = 2)
+lag.plot(res_A,
+         main = "Arcsin transformed: lag plot",
+         diag = FALSE, do.lines = FALSE)
+hist(res_A, breaks = 5, xlab = "residuals", main = "Arcsin transformed: histogram")
+qqnorm(res_A, main = "Arcsin transformed: normal plot"); qqline(res_A)
+par(mfrow = c(1, 1))
+```
+
+### Box 2 (Analysis 3), arcsine-transformed survival
+
+| Question | Answer |
+|----------|--------|
+| Is the straight-line assumption valid? | **Yes**: no obvious bowls or arches in the residual vs fit plot. |
+| Are the residuals homogeneous? | **No (still)**: the same pinched pattern at density 50 and wider spread at the other densities. |
+| Are the residuals normal? | **Yes, approximately**: points close to the line in the normal probability plot. |
+| Did the arcsin transform change the residual diagnostics concerning normality? | **No**: normality looked acceptable before and after, and the plots are almost the same shape. |
+
+So the arcsin "ritual" did not fix the one problem we found (homogeneity) and was not needed for normality.
+
+## Likelihood ratio for both versions (write-up, Analysis 3)
+
+```{r LR-survival}
+LR <- function(model) (1 - summary(model)$r.squared)^(-nobs(model) / 2)
+
+compare <- data.frame(
+  response = c("PctS (untransformed)", "asinS (arcsin)"),
+  r_squared = c(summary(Smod)$r.squared, summary(Amod)$r.squared),
+  n = c(nobs(Smod), nobs(Amod)),
+  F = c(anova(Smod)$"F value"[1], anova(Amod)$"F value"[1]),
+  p = c(anova(Smod)$"Pr(>F)"[1], anova(Amod)$"Pr(>F)"[1]),
+  LR = c(LR(Smod), LR(Amod)))
+compare
+```
+
+**Comment.** Both LRs are very large (thousands of times more likely than $\beta = 0$), so the
+evidence for a density effect is strong whichever version is used. The transformation changes
+the LR somewhat but does not change the conclusion, and does not fix the homogeneity problem. 
+**The conclusion (survival declines with egg density) is the same either way**
+
+## Box 3 (Analysis 3). Is it worth recomputing the p-value by randomization?
+
+```{r box3}
+nobs(Amod)                              # sample size
+anova(Amod)$"Pr(>F)"[1]                 # p-value (arcsin analysis)
+anova(Smod)$"Pr(>F)"[1]                 # p-value (untransformed)
+```
+
+| Question | Answer |
+|----------|--------|
+| Is the sample size small (less than 30)? | **Yes** (n = 14). |
+| Is the p-value close to $\alpha = 5\%$? | **No**: p is about 0.0005 (arcsin) and 0.0002 (untransformed), roughly 100 to 300 times smaller than 0.05. |
+| Is the decision likely to change if we obtain a more accurate p-value by randomization? | **No**: a p-value this far below 5% will not move across the criterion (a change by a factor of about 5 would not matter), so we reject $H_0$ without the extra work. |
+
+\newpage
+
+# Extra (optional). ANOVA table and F-ratio with several Y-values per X-value
+
+The recommended procedure forms the F-ratio from **all** the observations. Using the group
+means instead is proper only if each mean is weighted by its sample size $n$.
+
+```{r extra-means}
+# One row per egg density: mean of asinS and the number of observations n
+asin_mean <- aggregate(asinS ~ Eggs, data = TriboliumSurvival, FUN = mean)
+asin_mean$n <- as.vector(table(TriboliumSurvival$Eggs))
+asin_mean
+
+# Regression on the means, weighted by n
+Wmeans <- lm(asinS ~ Eggs, data = asin_mean, weights = n)
+
+rbind(all_data = coef(Amod), weighted_means = coef(Wmeans))   # same estimates
+anova(Wmeans)
+```
+
+The slope, the intercept and the **regression** sum of squares (284.1) are identical to the analysis
+of all 14 observations. The *residual* line differs: the weighted-means analysis has only
+4 means, so its residual (2 df) is only the deviation of the means from the line ("lack of fit").
+It misses the variation of individual observations around their group mean ("pure error").
+Adding the two back gives the table of Box 14.4:
+
+```{r extra-box14-4}
+lack_of_fit <- anova(Wmeans)["Residuals", c("Sum Sq", "Df")]   # means vs line
+group_fit   <- lm(asinS ~ factor(Eggs), data = TriboliumSurvival)  # one mean per density
+pure_error  <- c(deviance(group_fit), df.residual(group_fit))     # variation within groups
+
+box14_4 <- data.frame(
+  Source = c("Regression (density)", "Deviation from line (lack of fit)",
+             "Within groups (pure error)", "Total residual"),
+  SS = c(anova(Wmeans)["Eggs", "Sum Sq"], lack_of_fit[[1]], pure_error[1],
+         lack_of_fit[[1]] + pure_error[1]),
+  df = c(1, lack_of_fit[[2]], pure_error[2], lack_of_fit[[2]] + pure_error[2]))
+box14_4$MS <- box14_4$SS / box14_4$df
+box14_4$F  <- c(box14_4$MS[1] / box14_4$MS[4], box14_4$MS[2] / box14_4$MS[3], NA, NA)
+box14_4
+
+# Check against the analysis of all 14 observations
+anova(Amod)
+```
+
+Regression F = `r round(box14_4$F[1], 2)` on 1 and 12 df, the same as `anova(Amod)`, so using the means
+**with the right weights and the pooled error** reproduces the all-data analysis. The lack-of-fit F
+(`r round(box14_4$F[2], 2)`, a small value) also says that the straight line describes the four
+means adequately.
+

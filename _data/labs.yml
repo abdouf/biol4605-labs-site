@@ -128,9 +128,9 @@ labs:
     focus: "Fitting simple linear models. Model formulation (Y = b0 + b1*X + e), parameter estimation, and residual diagnostic plots."
     deliverable: "Annotated lm() output and diagnostic plots"
     software: "lm(), summary(), plot() in R"
-    rmd_file: "rmd/lab05a-glm-simple-regression.Rmd"
+    rmd_file: "rmd/lab05-glm-simple-regression.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
+    downloadable: true
 
   - week: 6
     week_padded: "06"
