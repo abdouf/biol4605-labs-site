@@ -18,6 +18,17 @@ Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 **Key deliverable:** Annotated lm() output and diagnostic plots
 **Software / functions:** `lm(), summary(), plot() in R`
 
+This lab's instructions and exercises are Dr. David C. Schneider's original
+**"GLM - Simple Regression "** lab, unchanged from his site:
+
+[Open Lab 5 (PDF) on Dr. Schneider's site ↗](https://davidcschneider.github.io/StatisticalScience/Labs/Lab05a.pdf){:target="_blank" .btn .btn-outline }
+
+## Lab materials (Data)
+
+[Open Tribolium Survival Data (Box 14.4 in Sokal and Rohlf 2012) on Dr. Schneider's site ↗](https://github.com/DavidCSchneider/StatisticalScience/blob/main/Data/Labs/TriboliumSurvival.csv){:target="_blank" .btn .btn-outline }
+
+[Open Tribolium Weights Data (Box 14.1 in Sokal and Rohlf 2012) on Dr. Schneider's site ↗](https://github.com/DavidCSchneider/StatisticalScience/blob/main/Data/Labs/TriboliumWeights.txt){:target="_blank" .btn .btn-outline }
+
 ## Starter file
 
 {% assign this_lab = site.data.labs.labs | where: "week", 5 | first %}
