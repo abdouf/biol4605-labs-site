@@ -1,150 +1,814 @@
 ---
-title: "Lab 6a/b: GLM – Single Factor ANOVA"
-subtitle: "BIOL/OCSC 4605 · 7220 --- Statistical Analysis in Biology and Environmental Science"
-author: "Student Name (replace)"
-date: "`r format(Sys.Date(), '%d %B %Y')`"
+title: "Lab 6a/b. The General Linear Model: Single Factor ANOVA"
+subtitle: "BIOL/OCSC 4605 / 7220"
+author: "Your name here"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
 output:
   html_document:
     toc: true
     toc_float: true
-    number_sections: false
-    code_folding: show
-    theme: flatly
-    css: ../assets/css/course.css
-    self_contained: true
-params:
-  week: 6
-  module: "Part 3: The General Linear Model – Single Explanatory Variable"
-  due_date: "YYYY-MM-DD"
+  pdf_document:
+    toc: true
+    toc_depth: 2
+fontsize: 11pt
+geometry: margin=1in
 ---
-
-<!--
-  ============================================================================
-  STANDARD LAB TEMPLATE — BIOL/OCSC 4605 · 7220
-  ============================================================================
-  This file was generated from templates/lab_template.Rmd. Keep the section
-  structure and YAML options consistent across labs so students always know
-  where to look. Replace every "(edit me)" / placeholder comment before
-  distributing this lab.
-
-  To regenerate ALL 13 labs from an updated version of this template, edit
-  templates/lab_template.Rmd and re-run the generator script described in the
-  repo README, then re-apply any lab-specific edits you had made.
-  ============================================================================
--->
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE, message = FALSE, warning = FALSE,
-  fig.width = 6, fig.height = 4
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center", fig.width = 6, fig.height = 4)
+options(digits = 5)
+set.seed(4605)   # makes the randomization in Analysis 3 reproducible
+```
+
+# How to use this file
+
+The code is complete, but the **answers to the questions are left blank** for you to work out. Fill each `Your answer` line as we go.
+
+Put `DaphniaAges.txt`, `FlyWings.txt` and `FishMove.txt` in the **same folder** as this `.Rmd` OR your working directory. You can also load it directly from the course website (online loading).
+
+* Daphnia: https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/refs/heads/main/Data/Labs/DaphniaAges.txt
+
+* Fly Wings: https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/refs/heads/main/Data/Labs/FlyWings.txt
+
+* Cod Movement: https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/refs/heads/main/Data/Labs/FishMove.txt
+
+Instructions:
+
+* Run chunk by chunk (green arrow).
+* After completing the Lab press **Knit**, select **Knit to PDF** to produce the output, and submit that PDF
+* Before you run a block of code, ask yourself: what does this line do, and what do I expect to see?
+
+**The idea of the lab.** ANOVA is the General Linear Model (GLM) with a *categorical* explanatory
+variable (a **factor**). Everything you learned in Lab 5 carries over: write the model, run it,
+save residuals and fitted values, check the residuals, then test. The general form of the model is
+
+$$Y = \beta_0 + \beta \, X + \epsilon_{normal}$$
+
+where:
+
+* $\beta_0$ is the mean of the reference group (e.g., Placebo group)
+* $\beta$ is the difference in group mean ($\text{Mean}_{\text{Treatment group}} - \text{Mean}_{\text{Placebo group}}$).
+
+For the Placebo group $X=0$,
+
+$$Y = \beta_0 + \beta(0) + \epsilon = \beta_0 + \epsilon$$
+
+For the Treatment Group ($X = 1$),
+
+$$Y = \beta_0 + \beta(1) + \epsilon = \beta_0 + \beta + \epsilon$$ 
+
+The straight-line assumption (Assumption 1) does not apply to a factor, so only the three error
+assumptions remain: (1) homogeneous, (2) normal and (3) independent residuals.
+
+\newpage
+
+# Analysis 1. Fixed factor ANOVA: *Daphnia* ages
+
+**Research question.** Does average age at the beginning of reproduction depend on strain in *Daphnia*?
+
+(Data: Box 9.5, Sokal and Rohlf 1995. Age in days at first reproduction, 7 *Daphnia longispina* in each of 2 genetic strains.)
+
+## 1.1 Response and explanatory variables
+
+At first glance each column looks like a variable. Look more closely: both columns hold the **same
+variable (age)**, arranged in two groups (strains).
+
+The response variable (the one plotted on the Y axis) is:
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+What is the explanatory variable (and its two categories)?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## 1.2 Table of variables (symbols *Age* and *Str*)
+
+| Variable | Symbol | Units | Type | Role |
+|:--|:--|:--|:--|:--|
+| Age at first reproduction | Age | days | numeric | Response |
+| Strain | Strain | none (2 categories) | nominal | Explanatory |
+
+## 1.3 The model in GLM format
+
+* What is the symbol for the Response? 
+
+* What is the symbol for the Explanatory ?
+
+Fill in the blanks of  $\_\_\_\_ = \beta_0 + \beta \_\_\_\_ + \epsilon_{normal}$:
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+where $\beta_0$ = mean of the reference group and $\beta$ =  treatment group mean $-\ \beta_0$).
+
+## 1.4 Define the data from file (tabular format)
+
+The text file has **7 rows and 2 columns**, one column per strain, followed by notes. `nrows = 7` makes R read
+only the data. The data is not well organised for group mean comparison. We then name each group (column) *Strain1* and *Strain2*.
+
+```{r daphnia-wide}
+# 1. Original wide format
+daphnia_wide <- data.frame(
+  Strain_I  = c(7.2, 7.1, 9.1, 7.2, 7.3, 7.2, 7.5),
+  Strain_II = c(8.8, 7.5, 7.7, 7.6, 7.4, 6.7, 7.2)
 )
 
-# Packages used in this lab -- uncomment / extend as needed.
-# library(tidyverse)
-# library(emmeans)
-# library(car)
-# library(boot)
+# 2. Convert to long format using base R stack()
+daphnia_long <- stack(daphnia_wide)
+names(daphnia_long) <- c("age", "strain")
 
-set.seed(4605) # reproducible randomization / bootstrap results across labs
+# 3. Clean up factor labels
+levels(daphnia_long$strain) <- c("Strain I", "Strain II")
+
+daphnia_long
 ```
 
-## Learning objectives
+Now, let's import the true data
 
-> Group comparison models. Factor coding, sum of squares decomposition, variance partitioning, and post-hoc contrasts.
+```{r d-import}
+dfile <- "DaphniaAges.txt"
 
-By the end of this lab, you should be able to:
-
-1. *(objective 1 --- edit me)*
-2. *(objective 2 --- edit me)*
-3. *(objective 3 --- edit me)*
-
-**Module:** Part 3: The General Linear Model – Single Explanatory Variable &nbsp;|&nbsp; **Week:** 6 &nbsp;|&nbsp; **Key deliverable:** ANOVA table with post-hoc contrasts
-
-> Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
-
-
-## Background
-
-*(One to two paragraphs of conceptual background specific to this lab. Link
-back to the relevant section of Schneider's*
-[*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/)*.)*
-
-## Data
-
-*(Describe or load the dataset used this week. Replace the placeholder code
-below with the actual read-in step, or remove it if this lab has no dataset,
-e.g. Lab 1's physical-cards exercise.)*
-
-```{r load-data}
-# df <- read.csv(here::here("data", "FILENAME.csv"))
-# str(df)
+DaphniaAges <- read.table(dfile, nrows = 7)       # read the 7 data rows
+names(DaphniaAges) <- c("Strain1", "Strain2")     # name each group (column)
+DaphniaAges                                       # display the input table
+Mean_Strain1 <- mean(DaphniaAges$Strain1)
+Mean_Strain1
+Mean_Strain2 <- mean(DaphniaAges$Strain2)
+Mean_Strain2
 ```
 
-## Guided walkthrough
+## 1.5 Reorganize from tabular to model format
 
-### Step 1 --- *(edit me)*
+Some packages can run ANOVA on the tabular format (Minitab: `aovoneway c1-c2`). R's `lm()` needs **model
+format**: all values of the response in **one column** and, next to each value, a **label** for its group.
 
-```{r step-1}
+Pseudocode (handout p. 2): place each response value into one column; name it; label a new column for
+the explanatory variable; for each Y value, put its category label in the adjacent X column.
 
+```{r d-stack}
+Daphnia <- stack(DaphniaAges)        # stack the columns; adds a label column (ind)
+names(Daphnia) <- c("Age", "Strain") # name the two new columns: response, factor
+Daphnia                              # display the data object (14 rows)
+str(Daphnia)                         # Age is numeric; Strain is a factor with 2 levels
 ```
 
-### Step 2 --- *(edit me)*
+Line 1 creates a new object (nothing is printed); line 2 renames
+columns (nothing printed); line 3 prints the 14 rows. `str()` confirms that `Strain` is a **factor**,
+which is exactly what `lm()` needs for ANOVA.
 
-```{r step-2}
+**Why *Strain* is a fixed factor?** The research question was whether these **two known genetic strains**
+differ. They are not a random sample from a population of strains, so inference is to these two strains only.
 
+## 1.6 Run the GLM ANOVA and save residuals and fits
+
+Define Y = Age, define X = Strain, write the model and run it, save residuals and fitted values.
+
+```{r d-lm}
+DModel <- lm(Age ~ Strain, data = Daphnia)   # the model:  Age = grand mean + strain effect
+Dfit <- fitted(DModel)                     # fitted values: the mean of each strain
+Dres <- resid(DModel)                      # residuals: observation - its strain mean
+summary(DModel)                           # parameter estimates and t-tests
+anova(DModel)                                # the ANOVA table (SS, df, MS, F, p)
 ```
 
-### Step 3 --- *(edit me)*
+### What do the coefficients mean?
 
-```{r step-3}
+**Intercept and "slope"**
 
+R uses treatment coding by default, setting the first factor level (Strain 1) as the reference baseline.
+
+Strain 1 is the reference (Strain = 0)
+
+Thus, 
+
+$$\text{Mean}_{Age\; strain\; 1} = \beta_0 + \epsilon_{normal}$$
+
+$\text{Parameter StrainStrain2} = 0.0429$ is the difference between the mean of Strain 2 and the mean of Strain 1
+
+$$\text{Mean}_{Age\; strain\; 2} = \text{Parameter StrainStrain2} + \text{Mean}_{Age\; strain\; 1}  + \epsilon_{normal}$$
+$$\text{Mean}_{Age\; strain\; 2} = \text{Parameter StrainStrain2} + \text{Mean}_{Age\; strain\; 1} = 0.0429 + 7.5143 = 7.5572$$
+
+```{r calculated-vs-model}
+Compare_means <- data.frame(
+  rbind(Calculated = c(Mean_Strain1,Mean_Strain2), 
+        Model_estimates = c(coef(DModel)[1],coef(DModel)[2]+coef(DModel)[1])
+        )
+  )
+names(Compare_means) <- c("Strain 1","Strain 2")
+Compare_means
+
+# Let's look at the mean of each group directly given by GLM
+fitted(DModel)
 ```
 
-## Diagnostics / verification
+**F-ratio**
 
-*(Residual plots, randomization overlays, homogeneity checks, or other
-verification appropriate to this lab's method. Primary tools this week:*
-`lm(), anova(), emmeans package`*.)*
+F-ratio determines whether the difference between averages of strain 1 and strain 2 are meaningful or just the result of random chance.
 
-```{r diagnostics}
+$$\text{F-ratio} = \frac{\text{Variance between groups}}{\text{Variance within groups}}$$
 
+If F < 1 (Low F): The observed differences is likely due to the natural noise inside the groups.
+
+If F ≈ 1 (Low F): The differences between group averages are about the same size as the natural noise inside the groups. The variation is likely due to random chance.
+
+Large F (e.g., 5, 10, or higher): The differences between group averages are much larger than the noise inside the groups. This indicates that at least one group is genuinely different from the others.
+
+```{r d-ttest}
+anova(DModel) # Look at the result first then run
+between_group_variance <- anova(DModel)$"Mean Sq"[1]
+between_group_variance
+within_group_variance <- anova(DModel)$"Mean Sq"[2]
+within_group_variance
+f_ratio_calculated <- between_group_variance/within_group_variance
+f_ratio_calculated
+f_ratio <- anova(DModel)$"F value"[1]
+f_ratio
+model_df <- anova(DModel)$"Df"[1] # $n_parameters/groups - 1 = 2 - 1$
+model_df
+residual_df <- anova(DModel)$"Df"[2] # Residual degrees of freedom (\text{total observations} - n_groups$) = 14 - 2.
+residual_df
+p_value <- anova(DModel)$"Pr(>F)"[1]
+p_value
 ```
 
-## Exercises
+What type of variance dominates?
 
-Work through the following and show your code and output for each.
+> **Answer.** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-1. *(exercise 1 --- edit me)*
-2. *(exercise 2 --- edit me)*
-3. *(exercise 3 --- edit me)*
+## 1.7 Evaluate the model: residual diagnostics
 
-## Submission questions
+**Assumption 1 (straight line).** There is no straight-line model with a factor, so we skip it.
+**Assumptions 2a and 2b.** Residuals homogeneous and normal. Plot the residuals against the fitted values and the normal scores.
 
-Answer in complete sentences below each question. These responses, together
-with your code above, are graded against this lab's key deliverable:
-**ANOVA table with post-hoc contrasts**.
-
-**Q1.** *(question --- edit me)*
-
-> *(your answer here)*
-
-**Q2.** *(question --- edit me)*
-
-> *(your answer here)*
-
-**Q3.** *(question --- edit me)*
-
-> *(your answer here)*
-
-## Submission checklist
-
-- [ ] Code chunks all run top-to-bottom without error (Knit ▸ Knit to HTML)
-- [ ] All placeholder text above has been replaced
-- [ ] Submission questions answered in full sentences
-- [ ] File renamed / submitted per course LMS instructions
-
----
-
-```{r session-info}
-sessionInfo()
+```{r d-diag, fig.width=7, fig.height=3.8, fig.cap="Daphnia ages: residuals vs fitted values (left) and normal scores plot (right)."}
+par(mfrow = c(1, 2))
+plot(Dfit, Dres, xlab = "fitted values (strain means)", ylab = "residuals",
+     main = "Residuals vs fits")
+abline(h = 0, lty = 2)
+qqnorm(Dres, main = "Normal scores of residuals")
+qqline(Dres)
+par(mfrow = c(1, 1))
+tapply(Dres, Daphnia$Strain, sd)       # spread of the residuals in each strain
 ```
+
+Errors homogeneous?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+Errors normal?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+
+## 1.8 Test, randomization and decision (Lab 6a items A-G)
+
+```{r d-numbers}
+c(between_group_variance = between_group_variance,
+  within_group_variance = within_group_variance,
+  f_ratio = f_ratio, 
+  model_df = model_df,
+  residual_df = residual_df,
+  p_value = p_value)
+```
+
+| Step | What to report | Result |
+|:--|:--|:--|
+| A | Model; $H_A$/$H_0$ about the difference in means | &nbsp; |
+| B | Test statistic | &nbsp; |
+| C | Residual vs fit plot | &nbsp; |
+| D | Normality (one graph) | &nbsp; |
+| E | Randomization needed? | &nbsp; |
+| F | Decision about $H_0$ | &nbsp; |
+| G | Decision in words | &nbsp; |
+
+A : Model and $H_A$/$H_0$ about the difference in means
+**Your answer:** $Age = \beta_0 + \beta\,Strain + \epsilon$. $H_0$: $\beta = 0$ (the two strain have the same mean). $H_A$: $\beta \neq 0$ (the means differ).
+
+B: Test statistic (Report $F = MS_{among}/MS_{within}$) with the model df and residual df
+**Your answer:** $F = 0.006/0.457 = 0.014062$ with 1 and 12 degree of freedom
+
+C: Statement about the Residual vs fit plot
+**Your answer:** The Residual vs fit plot is homogeneous (Figure above)
+
+D: Statement about Normality (one graph)
+**Your answer:** Residuals are close to the line except two large points
+
+E: Do we need Randomization?
+**Your answer:** No. n = 14 is small, but $p$ = 0.91 is nowhere near $\alpha$ = 0.05, so a better $p$-value cannot change the decision.
+
+F: Decision about $H_0$ 
+**Your answer:** We do not reject $H_0$
+
+G: State Decision in words 
+**Your answer:** There is no evidence that mean age at first reproduction differs between the two strains
+
+\newpage
+
+# Analysis 2. Random factor ANOVA: fly wing lengths
+
+**Research question.** What is the variance in fly wing length among 7 random samples?
+(Data: Table 8.1, Sokal and Rohlf; 7 samples of 5 housefly wing lengths; $WL$ = mm $\times$ 0.1.)
+
+## 2.1 Table of variables (symbols *WL* and *Sample*)
+
+| Variable | Symbol | Units | Scale type | Role |
+|:--|:--|:--|:--|:--|
+| Wing length | WL | 0.1 mm (mm x 0.1) | ratio | Response |
+| Sample (7 random samples) | Sample | none (7 categories) | nominal | Explanatory |
+
+## 2.2 The model in GLM format
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## 2.3 Import and reorganize (modify the code from Analysis 1)
+
+The file has 5 rows and 7 columns: each **column is one sample** of 5 flies. Same steps as Analysis 1:
+read, name the groups, stack, rename.
+
+```{r f-import}
+ffile <- "FlyWings.txt"
+FlyWings <- read.table(ffile, nrows = 5)             # 5 rows x 7 columns (5 observation x 7 groups)
+names(FlyWings) <- paste0("Sample", 1:7)             # name each group: Sample1 ... Sample7
+Flies <- stack(FlyWings)                             # tabular -> model format
+names(Flies) <- c("WL", "Sample")
+head(Flies, 10)
+str(Flies)                                           # 35 obs.; Sample is a factor with 7 levels
+```
+
+## 2.4 Run the model and print the data equations
+
+Pseudocode: values in one column Y; labels in X; calculate the mean of each category; place the mean next
+to each Y (the **fits**); calculate $Y - \text{fits}$ (the **residuals**); display
+**Data = Fits + Residuals**.
+
+```{r f-lm}
+FModel <- lm(WL ~ Sample, data = Flies)   # one-way ANOVA
+summary(FModel)
+Ffit <- fitted(FModel)                  # the mean of each flies' sample
+Fres <- resid(FModel)                   # observation - sample mean
+WL <- Flies$WL                        # copy the response into its own vector
+DataEq <- cbind(WL, Ffit, Fres)           # Data | Fits | Residuals side by side
+DataEq
+```
+
+Check that the columns add up (Data = Fits + Residuals):
+
+```{r f-check}
+all.equal(unname(WL), unname(Ffit + Fres))   # TRUE: Data = Model + Residual for every fly
+```
+
+Pick one wing-length observation and write its data equation:
+
+> **Answer.** First fly: (Data) 41 = (Model mean of Sample1) 43.6 + (Residual) -2.6.
+
+Your turn, pick one,
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+Going one step further, the model part splits into the grand mean and the sample effect:
+
+```{r f-split}
+# Sample 1 effect
+Fgrand <- mean(Flies$WL)
+c(grand_mean = Fgrand, sample1_effect = Ffit[1] - Fgrand, residual = Fres[1])
+# Sample 2 effect
+c(grand_mean = Fgrand, sample2_effect = Ffit[8] - Fgrand, residual = Fres[1])
+
+summary(lm(WL ~ Sample, data = Flies, contrasts = list(Sample = "contr.sum")))
+```
+
+Reconstructing Group Means (`contr.sum`)
+
+| Group | Formula ($\text{Grand Mean} + \text{Effect}$) | Calculated Sample Mean |
+| :--- | :--- | :---: |
+| Sample 1 | $45.343 + (-1.743)$ | 43.60 |
+| Sample 2 | $45.343 + 2.657$ | 48.00 |
+| Sample 3 | $45.343 + 1.057$ | 46.40 |
+| Sample 4 | $45.343 + (-2.943)$ | 42.40 |
+| Sample 5 | $45.343 + (-1.143)$ | 44.20 |
+| Sample 6 | $45.343 + 2.057$ | 47.40 |
+| Sample 7 | $45.343 + 0.057$ | 45.40 |
+
+Where is sample 7 effect? R does not display it, but it can be calculated from the first 6 effect
+
+Because all group effect mus sum to zero, we calculate it by taking the negative sum of the first 6 effects.
+
+$$\text{Sample7_effect} = -(-1.743 + 2.657 + 1.057 - 2.943 - 1.143 + 2.057) = -(-0.057) = +0.057$$
+
+## 2.5 Why *Sample* is a random factor
+
+The groups were **not formed by named treatments** as in an experiment; the samples were chosen without
+regard to any attribute of the group. The research question asks whether groups **differ at all**, and
+inference is to the **population the samples were drawn from**, not just the 7 samples measured.
+For a random factor the null hypothesis is about a **variance**, not about specific means.
+
+## 2.6 Evaluate the model
+
+```{r f-diag, fig.width=7, fig.height=3.8, fig.cap="Fly wing lengths: residuals vs fitted values (left) and normal scores plot (right)."}
+par(mfrow = c(1, 2))
+plot(Ffit, Fres, xlab = "fitted values (sample means, 0.1 mm)", ylab = "residuals",
+     main = "Residuals vs fits")
+abline(h = 0, lty = 2)
+qqnorm(Fres, main = "Normal scores of residuals")
+qqline(Fres)
+par(mfrow = c(1, 1))
+round(tapply(Fres, Flies$Sample, sd), 2)      # spread within each sample
+```
+
+Do you see any strong heterogeneity in the residual vs fit plot?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+Do you see any strong deviation from a normal distribution of residuals?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## 2.7 Test, variance components and decision
+
+```{r f-anova}
+# 1. Run ANOVA table on the 7-level model
+anova_table <- anova(FModel)
+anova_table
+# 2. Extract variances (Mean Squares)
+flies_between_group_variance <- anova_table$"Mean Sq"[1]  # MS_Sample (MS between groups)
+flies_within_group_variance  <- anova_table$"Mean Sq"[2]  # MS_Residuals (MS within groups)
+
+# 3. Calculate and extract F-ratio
+flies_f_ratio_calculated <- flies_between_group_variance / flies_within_group_variance
+flies_f_ratio            <- anova_table$"F value"[1]
+
+# 4. Extract degrees of freedom
+flies_model_df <- anova_table$"Df"[1]  # k - 1 = 7 groups - 1 = 6
+flies_residual_df <- anova_table$"Df"[2]  # N - k = 35 - 7 = 28
+
+# 5. Extract p-value
+flies_p_value <- anova_table$"Pr(>F)"[1]
+
+# 6. Combine into a named vector
+results_vector <- c(
+  between_group_variance = flies_between_group_variance,
+  within_group_variance  = flies_within_group_variance,
+  f_ratio                = flies_f_ratio, 
+  model_df               = flies_model_df,
+  residual_df            = flies_residual_df,
+  p_value                = flies_p_value
+)
+print(results_vector)
+```
+
+| Step | What to report | Result |
+|:--|:--|:--|
+| A | Model; $H_A$/$H_0$ | &nbsp; |
+| B | Test statistic | &nbsp; |
+| C | Residual vs fit | &nbsp; |
+| D | Normality (one graph) | &nbsp; |
+| E | Randomization needed? | &nbsp; |
+| F | ANOVA table; decision | &nbsp; |
+| G | Decision in words | &nbsp; |
+
+A: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+B: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+C: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+D: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+E: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+F: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+G: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+\newpage
+
+# Analysis 3. ANOVA in model format: cod movements
+
+The data are from Don Clark (Memorial University), used with permission. The data illustrate several
+perplexities: should we treat **time as a regression variable or as a factor**? What if we cannot trust the
+$p$-values because of gross violations of assumptions? Is randomization worth the effort?
+
+## 3.1 Read the structure of the file
+
+The information about the structure is at the **bottom** of the file: the variates are distances (m) moved
+by tagged cod in 10 successive 2-minute periods at each of 12 times of day. The first column is the time
+group (1 to 12), the second the distance.
+
+```{r fish-import}
+mfile <- "FishMove.txt"
+FishMove <- read.table(mfile, nrows = 120)       # 120 rows: 12 times x 10 periods
+names(FishMove) <- c("Time", "Dist")             # time group, distance moved (m)
+str(FishMove)                                    # Time was read as integer (numeric)
+head(FishMove)
+```
+
+State a research question (Look at the end of the file online):
+Copy paste in your browser or look in your downloaded data
+https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/refs/heads/main/Data/Labs/FishMove.txt
+
+
+Research Question:
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## 3.2 Time: regression variable or factor?
+
+To decide, plot Distance against Time. `Time` is currently numeric, so R draws a scatterplot.
+
+```{r fish-scatter, fig.cap="Cod movement (distance per 2-minute period) against time-of-day group, with the mean of each group."}
+with(FishMove, plot(Time, Dist, xlab = "Time of day (group 1 = dawn ... 12)",
+                    ylab = "Distance moved (m)",
+                    main = "Cod movement vs time of day"))
+means_by_time <- tapply(FishMove$Dist, FishMove$Time, mean)
+lines(1:12, means_by_time, col = "red", lwd = 2)            # the mean of each time group
+```
+
+Why is fitting a trend (regression line) inappropriate?
+
+> **Answer.** The pattern is not a straight line: movement is high at dawn, low in mid-morning, high again around group 6, low again, then highest at the end (a repeating up-and-down pattern). A line cannot follow it, so a regression would wrongly say time does not matter.
+
+Now fit the straight-line regression (Time still numeric) and look at the result:
+
+```{r fish-regression}
+anova(lm(Dist ~ Time, data = FishMove))   # Time still numeric: a straight-line regression
+```
+
+## 3.3 Table of variables and model
+
+| Variable | Symbol | Units | Scale type | Role |
+|:--|:--|:--|:--|:--|
+| Distance moved per 2-minute period | Dist | m | ratio | Response |
+| Time of day (groups 1-12, from dawn) | Time | group code (hours after dawn) | nominal (12 categories) | Explanatory |
+
+
+Use your symbols to write the model in GLM format:
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## 3.4 Convert numbers to a factor and run the GLM ANOVA
+
+R reads `Time` as numeric because every entry is a number. To treat it as **categories**, convert it
+to a factor with `as.factor()`:
+
+```{r fish-factor}
+FishMove$Time <- as.factor(FishMove$Time)   # numeric -> factor (12 levels)
+str(FishMove)
+```
+
+The same `plot()` call now draws **boxplots**, because Time is a factor:
+
+```{r fish-boxplot, fig.cap="Cod movement by time-of-day group (boxplots), after Time was converted to a factor."}
+with(FishMove, plot(Time, Dist, xlab = "Time of day (group 1 = dawn ... 12)",
+                    ylab = "Distance moved (m)", main = "Distance by time group"))
+```
+
+Define Y; define X; execute the model and save residuals and fitted values; check the
+$p$-value assumptions (homogeneous, normal residuals).
+
+```{r fish-lm}
+CModel <- lm(Dist ~ Time, data = FishMove)
+Cfit <- fitted(CModel)
+Cres <- resid(CModel)
+anova(CModel)
+summary(CModel)$r.squared     # proportion of variance explained by time of day
+```
+
+## 3.5 Residual diagnostics
+
+```{r fish-diag, fig.width=7, fig.height=3.8, fig.cap="Cod movement: residuals vs fitted values (left) and normal scores plot (right)."}
+par(mfrow = c(1, 2))
+plot(Cfit, Cres, xlab = "fitted values (mean distance, m)", ylab = "residuals",
+     main = "Residuals vs fits")
+abline(h = 0, lty = 2)
+qqnorm(Cres, main = "Normal scores of residuals")
+qqline(Cres)
+par(mfrow = c(1, 1))
+round(tapply(FishMove$Dist, FishMove$Time, sd), 2)    # SD of each time group
+cor(Cfit, abs(Cres))                                  # does spread grow with the mean?
+```
+
+Are the residuals homogeneous?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+Are the residuals normal?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## 3.6 Is randomization worth the effort?
+
+Having checked the residuals, we ask: could a better $p$-value change the decision?
+We can check by randomization (Lab 4 method): shuffle the time labels, recompute $F$, and see how often shuffled data give an $F$ as large
+as the observed one.
+
+```{r fish-rand}
+nrep <- 2000
+C_F <- anova(CModel)$"F value"[1]
+C_P <- anova(CModel)$"Pr(>F)"[1]
+F_random <- replicate(nrep, anova(lm(Dist ~ sample(Time), data = FishMove))$"F value"[1])
+c(F_observed = C_F, p_F_distribution = C_P,
+  p_randomization = mean(F_random >= anova(CModel)$"F value"[1]), shuffles = nrep)
+```
+
+
+```{r fish-rand-plot, fig.height=3.6, fig.cap="Randomization distribution of F (2000 reshuffles). The red line is the observed F."}
+hist(F_random, breaks = 30, xlim = c(0, max(C_F, F_random) * 1.05),
+     xlab = "F from reshuffled data", main = "Randomization distribution of F")
+abline(v = C_F, col = "red", lwd = 2)
+```
+
+
+## 3.6 Anova table and key parameters
+
+```{r cod-anova-table}
+# 1. Run ANOVA table once and store it
+cod_anova <- anova(CModel)
+
+# 2. Extract variances (Mean Squares)
+cod_between_group_variance <- cod_anova$"Mean Sq"[1]  # MS between
+cod_within_group_variance  <- cod_anova$"Mean Sq"[2]  # MS within (residuals)
+
+# 3. F-ratio
+cod_f_ratio_calculated <- cod_between_group_variance / cod_within_group_variance
+cod_f_ratio <- cod_anova$"F value"[1]
+
+# 4. Degrees of freedom
+cod_model_df <- cod_anova$"Df"[1]
+cod_residual_df <- cod_anova$"Df"[2]
+
+# 5. P-value
+cod_p_value <- cod_anova$"Pr(>F)"[1]
+
+# 7. Combine into a named vector
+cod_results <- c(
+  between_group_variance = cod_between_group_variance,
+  within_group_variance  = cod_within_group_variance,
+  f_ratio_calculated     = cod_f_ratio_calculated,
+  f_ratio                = cod_f_ratio,
+  model_df               = cod_model_df,
+  residual_df            = cod_residual_df,
+  p_value                = cod_p_value
+)
+print(cod_results)
+```
+
+| Step | What to report | Result |
+|:--|:--|:--|
+| A | Model; $H_A$/$H_0$ | &nbsp; |
+| B | Test statistic | &nbsp; |
+| C | Residual vs fit | &nbsp; |
+| D | Normality (one graph) | &nbsp; |
+| E | Randomization needed? | &nbsp; |
+| F | ANOVA table; decision | &nbsp; |
+| G | Decision in words | &nbsp; |
+
+A: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+B: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+C: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+D: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+E: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+F: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+G: > **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+\newpage
+
+# Lab 6b : find your own data and apply the 10-step recipe
+
+This is not required
+
+**Task:** Find data presented in **at least three categories of a single explanatory variable**.
+Display the data in **model format**, showing the variable names and the first 10 lines. List the **full
+reference** for the source of the data. Then present the analysis using the **10-step generic recipe
+for hypothesis testing with the General Linear Model**.
+
+## Where to find data: the references on the course website
+
+The course website keeps a file of references to articles that display data
+([RefswithDataForGeneralLinearModels.txt](https://github.com/DavidCSchneider/StatisticalScience/blob/main/Data/RefswithDataForGeneralLinearModels.txt)).
+The file has three sections: references for models with 2 factors (3 references), 3 factors (1 reference) and
+miscellaneous GLMs (a longer list; see the file). The multi-factor references are:
+
+**Refs with data for GLM with 3 factors (3-way ANOVA)**
+
+1. Berven, K.A. and Grudzien, T.A. (1990). Dispersal in the wood frog (*Rana sylvatica*): implications for genetic population structure. *Evolution* 44: 2047-2056.
+
+**Refs with data for GLM with 2 factors (2-way ANOVA)**
+
+1. Boyd, J.T. (1960). Climate, air pollution, and mortality. *British Journal of Preventive and Social Medicine* 14: 123-135.
+2. Eberhardt, L.L. (1978). Transect methods for population studies. *Journal of the Wildlife Management* 42: 1-31.
+3. Heitman, H., et al. (1958). Ambient air temperature and weight gain in swine. *Journal of Animal Science* 17: 62-67.
+
+For Lab 6b you need only **one** explanatory variable with 3 or more categories: pick one factor from the
+article (or one table of data), and ignore the other factors. Articles published before 1980 display raw
+data more often than recent ones. Check the handout rule: use the **full reference** (authors, year, title,
+journal, volume, pages).
+
+## What is the 10-step generic recipe?
+
+The recipe is Dr. Schneider's *Generic Recipe* for inference with the General Linear Model
+(Part 3 lecture notes,
+[GenericRecipe2019.pdf](https://www.mun.ca/biology/schneider/b4605/LNotes/Pt3/GenericRecipe2019.pdf)).
+
+| Earlier lab | What it gave you | Recipe steps |
+|:--|:--|:--|
+| Lab 2 (Equations) | Table 2.1: a 6-step recipe to translate and use an equation (symbols, units, words, estimates, calculation) | 1 (write the model) |
+| Lab 3 (Distribution functions) | $p$-values from $t$, $F$, $\chi^2$ | 6-7 |
+| Lab 4 (Randomization) | Table 4.1: recipe for a randomization test | 8 |
+| Lab 5 (Regression) | model, residual diagnostics, likelihood ratio, $F$-test, "do we need to recompute the $p$-value?", effect size | 1-4, 6-10 |
+
+### The 10 steps, one by one
+
+| # | Step | What you do | R |
+|:--|:--|:--|:--|
+| 1 | Construct the model | State the question, identify **response** vs **explanatory** variable(s), their units and scale, and write the model | `Y = b0 + b X + e` |
+| 2 | Execute the model | Put the data in model format, code the model, compute fits and residuals | `stack()`, `lm()`, `fitted()`, `resid()` |
+| 3 | Evaluate with residuals | Check homogeneity, normality and independence. If a problem, go back to step 1 | `plot(fit, res)`, `qqnorm()`, `lag.plot()` |
+| 4 | Partition df and SS | Write the full model and the reduced (null) model; sums of squares and df for each term; likelihood ratio | `anova()` |
+| 5 | Define the target of inference | Decide what you want to say: strength of evidence, a decision at a fixed error rate, or an update of prior belief | (a decision) |
+| 6 | State the test statistic and its distribution | $F$, $t$, $\chi^2$, or Monte Carlo (randomization) | (a statement) |
+| 7 | Build the ANOVA table | Mean squares, $F$-ratio, $p$-value (Type I error) | `anova()`, `pf()` |
+| 8 | Recompute the $p$-value if necessary | Only if assumptions fail, the sample is small (< 30) and $p$ is near $\alpha$ | `replicate()`, `sample()` |
+| 9 | Report the statistical conclusion | Reject or not reject $H_0$; ANOVA table, factor contrasts | `anova()`, `summary()` |
+| 10 | Report the science conclusion | Biologically meaningful parameters (means, slopes) with one measure of uncertainty (SE, SD or CI) | `tapply()`, `confint()` |
+
+**Step 1 - Construct the model.** Before touching software, say in words what you are asking and which variable
+is the response (plotted on Y) and which is the explanatory variable (the factor). Write the model
+$Y = \beta_0 + \beta X + \epsilon$. *Lab link:* the "table of variables" you filled in at the start of every analysis.
+
+**Step 2 - Execute the model.** Reorganize the data to model format and fit it with `lm()`. Save the fitted values
+(the model part) and the residuals (the leftover). *Lab link:* `stack()` + `lm()` in Analysis 1.
+
+**Step 3 - Evaluate the model using residuals.** The $p$-value you will get in step 7 is only trustworthy if the
+residuals are homogeneous, independent and about normal. For a factor there is no straight-line assumption.
+If the residuals fan out (as for the cod data), a plain ANOVA may not be the right model.
+
+**Step 4 - Partition df and SS.** Compare two models: the *full* model ($Y = \beta_0 + \beta X$) and the
+*reduced* null model ($Y = \beta_0$, no factor). The SS the factor explains is the difference. The likelihood
+ratio $LR = (1 - r^2)^{-n/2}$ from Lab 5 measures how much more likely the data are under the full model.
+
+**Step 5 - Define the target of inference.** Three styles exist. *Evidential:* how strongly do the data favour
+one model over another (the LR). *Frequentist:* a decision at a fixed Type I error ($\alpha$ = 0.05).
+*Priorist:* update prior beliefs. In these labs we mainly use the first two.
+
+**Step 6 - State the test statistic.** For ANOVA it is $F = MS_{among}/MS_{within}$, with $df_1$ = number of
+groups $-$ 1 and $df_2$ = $n$ $-$ number of groups. It can be compared with the $F$ distribution (Lab 3) or with a
+randomization distribution (Lab 4).
+
+**Step 7 - Build the ANOVA table.** Sums of squares divided by df give mean squares; the ratio is $F$; `pf()`
+turns it into a $p$-value, the probability of an $F$ at least this large if $H_0$ were true.
+
+**Step 8 - Recompute the Type I error if necessary.** Randomization is extra work, so do it only when it could
+matter: assumptions violated **and** small sample **and** $p$ close to 0.05 (Lab 5's "do we need to recompute the
+$p$-value?" box, and the Box 3 questions).
+
+**Step 9 - Report the statistical conclusion.** "We reject / do not reject $H_0$", with $F$, df, $p$ and the ANOVA table.
+Remember: you can reject $H_0$, not "accept $H_A$".
+
+**Step 10 - Report the science conclusion.** Translate back to biology: which groups are higher or lower, by how
+much (means or contrasts) and with what uncertainty (SE, SD or CI).
+
+### Worked example: the 10 steps applied to the cod data
+
+**Step 1 - Model.** Question: does cod movement depend on time of day? Response *Dist* (m, ratio);
+explanatory *Time* (12 categories, nominal). Model $Dist = \beta_0 + \beta\,Time + \epsilon_{normal}$.
+
+**Steps 2 - 3 - Execute and evaluate.** Done in Analysis 3 (`CModel`, `Cfit`, `Cres`): residuals are **not** homogeneous and **not** normal.
+
+**Step 4 - Partition SS and df (full vs reduced model).**
+
+```{r r4}
+Cod_LR <- (1 - summary(CModel)$r.squared)^(- nrow(FishMove) / 2)
+reduced <- lm(Dist ~ 1, data = FishMove)      # H0 model: one grand mean, no time effect
+anova(reduced, CModel)                        # compares reduced vs full: same F as anova(CModel)
+c(r_squared = summary(CModel)$r.squared, n = nrow(FishMove), LR = Cod_LR)   # LR = (1 - r^2)^(-n/2)
+```
+
+The LR formula uses only $r^2$ and $n$; it does not penalise the 11 extra parameters, so compare it with the $p$-value
+rather than reading it alone.
+
+**Step 5 - Target of inference.** We make a frequentist decision at $\alpha$ = 0.05 and report the LR as supporting evidence.
+
+**Step 6 - Test statistic.** $F = MS_{Time}/MS_{residual}$ with 11 and 108 df (compared with the $F$ distribution and, in step 8, a randomization distribution).
+
+**Step 7 - ANOVA table.**
+
+```{r r7}
+anova(CModel)
+pf(anova(CModel)$"F value"[1], 11, 108, lower.tail = FALSE)          # p-value by hand from the F distribution
+```
+
+**Step 8 - Recompute the $p$-value if necessary.** The assumptions fail, but n = 120 is not small and $p$ is far
+from 0.05. The randomization we ran in Analysis 3 gave $p$ < 0.0005, in agreement, so the decision stands.
+
+**Step 9 - Statistical conclusion.** $F_{11,108}$ = 4.76, $p$ = 6.2 x 10$^{-6}$: reject $H_0$ (all 12 time-group means are equal).
+
+**Step 10 - Science conclusion.** Report the group means with an uncertainty measure.
+
+```{r r10, fig.cap="Mean distance moved (+/- 1 SE) by time-of-day group."}
+Cmean <- tapply(FishMove$Dist, FishMove$Time, mean)
+Cse   <- tapply(FishMove$Dist, FishMove$Time, function(x) sd(x) / sqrt(length(x)))
+round(rbind(mean = Cmean, SE = Cse), 2)
+# contrast of each group from the grand mean (sum-to-zero coding, as in the lab's definition of beta)
+round(Cmean - mean(Cmean), 2)
+
+mid <- barplot(Cmean, ylim = c(0, max(Cmean + Cse) * 1.15), xlab = "Time of day (group 1 = dawn ... 12)",
+               ylab = "Mean distance moved (m)")
+arrows(mid, Cmean - Cse, mid, Cmean + Cse, angle = 90, code = 3, length = 0.04)
+```
+
+Movement is highest at dawn (about 11.7 m) and in the last group (12.8 m), with a second peak at group 6 (11.1 m), and lowest around groups 3 and 9 (about 2.8 m). Because the residuals are right-skewed and heterogeneous, the
+group means (especially those at the peaks, with SE of 2.4-3.3 m) are imprecise; a transformation or a
+model with non-normal errors (Lab 10, GLMs) could be explored.

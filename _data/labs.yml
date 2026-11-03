@@ -144,7 +144,7 @@ labs:
     software: "lm(), anova(), emmeans package"
     rmd_file: "rmd/lab06-glm-single-factor-anova.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
+    downloadable: true
 
   - week: 7
     week_padded: "07"
