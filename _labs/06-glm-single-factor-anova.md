@@ -25,6 +25,8 @@ This lab's instructions and exercises are Dr. David C. Schneider's original
 
 ## Lab materials (Data)
 
+[All data folder on Dr. Schneider's site ↗](https://github.com/DavidCSchneider/StatisticalScience/tree/main/Data/Labs){:target="_blank" .btn .btn-outline }
+
 [Open Daphnia ages data (Box 9.5 in Sokal and Rohlf, 1995) on Dr. Schneider's site ↗](https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/refs/heads/main/Data/Labs/DaphniaAges.txt){:target="_blank" .btn .btn-outline }
 
 [Open Fly wing lengths data (Table 8.1 in Sokal and Rohlf, 2012) on Dr. Schneider's site ↗](https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/refs/heads/main/Data/Labs/FlyWings.txt){:target="_blank" .btn .btn-outline }
