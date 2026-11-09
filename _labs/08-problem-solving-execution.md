@@ -18,6 +18,19 @@ Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 **Key deliverable:** Complete R script / R Markdown report
 **Software / functions:** `Full tidyverse + lm()/glm() pipeline`
 
+This lab's instructions and exercises are Dr. David C. Schneider's original
+**"Problem-Solving with GLM "** lab, unchanged from his site:
+
+[Open Lab 9b (PDF) on Dr. Schneider's site ↗](https://davidcschneider.github.io/StatisticalScience/Labs/Lab09b.pdf){:target="_blank" .btn .btn-outline }
+
+## Lab materials (Data)
+
+[Open wireworms 1 data (Snedecor and Cochran 1980 p. 289) on Dr. Schneider's site ↗](https://github.com/DavidCSchneider/StatisticalScience/blob/main/Data/Labs/wworm1.txt){:target="_blank" .btn .btn-outline }
+
+[Open wireworms 2 data (Snedecor and Cochran 1980 p. 273) on Dr. Schneider's site ↗](https://github.com/DavidCSchneider/StatisticalScience/blob/main/Data/Labs/wworm2.txt){:target="_blank" .btn .btn-outline }
+
+[Open Leprosy bacilli data on Dr. Schneider's site ↗](https://github.com/DavidCSchneider/StatisticalScience/blob/main/Data/Labs/LeprosyScores.txt){:target="_blank" .btn .btn-outline }
+
 ## Starter file
 
 {% assign this_lab = site.data.labs.labs | where: "week", 8 | first %}
