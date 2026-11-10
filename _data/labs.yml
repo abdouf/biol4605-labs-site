@@ -158,7 +158,7 @@ labs:
     software: "R Markdown planning worksheet (no analysis code yet)"
     rmd_file: "rmd/lab09a-problem-solving-setup.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
+    downloadable: true
 
   - week: 8
     week_padded: "08"

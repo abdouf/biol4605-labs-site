@@ -1,150 +1,370 @@
 ---
-title: "Lab 9a: Problem-Solving with GLM (Setup)"
-subtitle: "BIOL/OCSC 4605 · 7220 --- Statistical Analysis in Biology and Environmental Science"
-author: "Student Name (replace)"
-date: "`r format(Sys.Date(), '%d %B %Y')`"
+title: "Lab 9a. Problem-Solving with the GLM: I. Setting up the analysis"
+subtitle: "BIOL/OCSC 4605 / 7220 - base R"
+author: "Your name here"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
 output:
   html_document:
     toc: true
     toc_float: true
-    number_sections: false
-    code_folding: show
-    theme: flatly
-    css: ../assets/css/course.css
-    self_contained: true
-params:
-  week: 7
-  module: "Parts 3–5: Applied Integration"
-  due_date: "YYYY-MM-DD"
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    extra_dependencies: ["fvextra"]
+fontsize: 11pt
+geometry: margin=1in
 ---
-
-<!--
-  ============================================================================
-  STANDARD LAB TEMPLATE — BIOL/OCSC 4605 · 7220
-  ============================================================================
-  This file was generated from templates/lab_template.Rmd. Keep the section
-  structure and YAML options consistent across labs so students always know
-  where to look. Replace every "(edit me)" / placeholder comment before
-  distributing this lab.
-
-  To regenerate ALL 13 labs from an updated version of this template, edit
-  templates/lab_template.Rmd and re-run the generator script described in the
-  repo README, then re-apply any lab-specific edits you had made.
-  ============================================================================
--->
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE, message = FALSE, warning = FALSE,
-  fig.width = 6, fig.height = 4
-)
-
-# Packages used in this lab -- uncomment / extend as needed.
-# library(tidyverse)
-# library(emmeans)
-# library(car)
-# library(boot)
-
-set.seed(4605) # reproducible randomization / bootstrap results across labs
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center", fig.width = 6, fig.height = 4)
 ```
 
-## Learning objectives
-
-> Experimental setup & data structuring. Formulating research questions into verifiable statistical architecture prior to execution.
-
-By the end of this lab, you should be able to:
-
-1. *(objective 1 --- edit me)*
-2. *(objective 2 --- edit me)*
-3. *(objective 3 --- edit me)*
-
-**Module:** Parts 3–5: Applied Integration &nbsp;|&nbsp; **Week:** 7 &nbsp;|&nbsp; **Key deliverable:** Model structure & DAGs / worksheets
-
-> Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
-
-
-## Background
-
-*(One to two paragraphs of conceptual background specific to this lab. Link
-back to the relevant section of Schneider's*
-[*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/)*.)*
-
-## Data
-
-*(Describe or load the dataset used this week. Replace the placeholder code
-below with the actual read-in step, or remove it if this lab has no dataset,
-e.g. Lab 1's physical-cards exercise.)*
-
-```{r load-data}
-# df <- read.csv(here::here("data", "FILENAME.csv"))
-# str(df)
+```{r wrap, echo=FALSE, results='asis'}
+# PDF only: wrap long code lines instead of letting them run off the page
+if (knitr::is_latex_output())
+  cat("\\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\\\\{\\}}")
+options(digits = 5)
+set.seed(4605)
 ```
 
-## Guided walkthrough
+# How to use this file
 
-### Step 1 --- *(edit me)*
+This lab is about **thinking**: you decide how to set up each analysis. The file reads the data and draws plots for you; **you** identify the variables, decide the scale types and factor types, and write the model. Do not fit any model yet: that is Lab 9b. Fill every `Your answer` line; this becomes step 1 of your write-up.
 
-```{r step-1}
+* The data are the **raw files** from the course website: `wworm1.txt`, `wworm2.txt` and `LeprosyScores.txt`.
+  The raw files are laid out as in the handout (one row per line of the field or per patient, treatments side by side),
+  so a short helper reshapes them into **one row per observation**, which is the format `lm()` needs.
+* Base R only. Run chunk by chunk or **Knit**.
+* Work in groups to decide how to analyse each data set.
 
+## Reading the raw data
+
+```{r data-helpers}
+# Where the raw data files live on the course website
+data_url <- "https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/refs/heads/main/Data/Labs/"
+
+# Read the first `nrows` lines of a raw text file (the files end with free-text notes that we skip).
+# If the file is in your working folder it is used; otherwise it is downloaded from the website.
+read_raw <- function(file, nrows) {
+  src <- if (file.exists(file)) file else paste0(data_url, file)
+  read.table(src, nrows = nrows)
+}
+
+# Latin square files: 5 lines (= rows of the field) x 10 numbers = 5 pairs (T, N), one pair per column of the field.
+# as.vector() reads a matrix column by column, so row varies fastest, as in the Minitab "stack" commands.
+latin_long <- function(raw) {
+  m <- as.matrix(raw)
+  data.frame(plot   = 1:25,
+             trtmnt = as.vector(m[, seq(1, 9, by = 2)]),   # T: treatment code (0 = control, 1-4 = fumigants)
+             count  = as.vector(m[, seq(2, 10, by = 2)]),  # N: wireworms per plot
+             col    = rep(1:5, each = 5),
+             row    = rep(1:5, times = 5))
+}
+
+# Leprosy file: 10 patients (lines) x 6 numbers = (before, after) for TRI, TRII and Control side by side.
+leprosy_long <- function(raw) {
+  m <- as.matrix(raw)
+  data.frame(patient   = 1:30,                    # 30 different patients
+             treatment = rep(c("TRI", "TRII", "Control"), each = 10),
+             before    = c(m[, 1], m[, 3], m[, 5]),
+             after     = c(m[, 2], m[, 4], m[, 6]))
+}
 ```
 
-### Step 2 --- *(edit me)*
+## The recipe (Lab 9b write-up, handout)
 
-```{r step-2}
+| Step | What to do |
+|:--|:--|
+| 1 | **Construct the model**: list response and explanatory variables; assign symbols, units and scale type; write the statistical model (Lab 9a). |
+| 2 | **Execute the model** and plot the residuals against the fitted values. |
+| 3 | **Evaluate assumptions**: residuals homogeneous (residual vs fit plot)? normal (histogram, quantile or normal score plot)? If not met, a randomization p-value may be necessary. |
+| 4 | **ANOVA**: Report origin of variation, df, sum of squares (the amount of variation attributed to each source); calculate the likelihood ratio (LR) for the full model (Quick check of whether the model explains enough to be worth testing term by term). If the evidence is negligible (LR < 20) report LR and the table; otherwise go on to step 7. |
+| 7 | **ANOVA**: calculate MS, F and the Type I error (p-values); report the full table. |
+| 9 | **Decisions**: first any **interaction** terms (p < alpha: reject H0; p >= alpha: cannot reject). If significant, interpret. If interactions are not significant, decide about the fixed factors and regression terms, then report slopes or means for the significant terms. |
 
+**The three data sets.** All three are **counts**. Counts often have heterogeneous errors (the variance grows with the mean), so you must look at how severe the heterogeneity is, what to do about it, and whether a recomputed p-value by randomization is needed.
+
+Data source: Snedecor and Cochran (1980) *Statistical Methods*, 7th ed., Iowa State University Press.
+
+\newpage
+
+# Part 1 (Lab 9a): Setting up the analysis
+
+Setting up is the most important and most difficult part of the analysis: it needs unfamiliar abstract thinking (identify variables, invent names for variables that include several categories, decide the measurement scale, separate response from explanatory variables). Questions to ask about **every** data set:
+
+1. What was **measured** on each unit (response)? What are the **units** (plots, patients, ...)?
+
+2. What was **manipulated** or recorded as a possible explanation (explanatory variables)?
+
+3. For each variable: **nominal** (categories), **ordinal**, **interval** or **ratio**? Sometimes numeric *codes* can be labels.
+
+4. Is each factor **fixed** (levels chosen on purpose; inference only to these levels) or **random** (levels sampled from a population)?
+
+5. Are factors **crossed** or **nested**? Can interactions be estimated (is there replication)?
+
+6. Could a numeric variable be a **covariate** (regression term) rather than a factor?
+
+## Data set 1: wireworms in a Latin square (wworm1)
+
+Snedecor and Cochran (1980) p. 289. **N** = number of wireworms per 9 x 9 x 5 inch plot; **T** = treatment: control (0) and 4 soil fumigants (1-4).
+Plots are arranged in a 5 x 5 array.
+
+**Take a look at the data first** before exploring
+
+```{r d1-import}
+w1_raw <- read_raw("wworm1.txt", nrows = 5)   # raw file: 5 lines x 10 numbers
+w1_raw                                           # look at the raw layout first
+w1 <- latin_long(w1_raw)                         # reshape: one row per plot
+w1
+str(w1)                           # check how R read each column
 ```
 
-### Step 3 --- *(edit me)*
+The layout of the field: treatment code (left) and count (right) in each row x column.
 
-```{r step-3}
-
+```{r d1-layout}
+with(w1, tapply(trtmnt, list(row = row, col = col), identity))   # treatment in each plot
+with(w1, tapply(count,  list(row = row, col = col), identity))   # count in each plot
 ```
 
-## Diagnostics / verification
-
-*(Residual plots, randomization overlays, homogeneity checks, or other
-verification appropriate to this lab's method. Primary tools this week:*
-`R Markdown planning worksheet (no analysis code yet)`*.)*
-
-```{r diagnostics}
-
+```{r d1-explore, fig.width=7, fig.height=3.6, fig.cap="Wireworm counts by treatment, row and column."}
+par(mfrow = c(1, 3))
+stripchart(count ~ trtmnt, data = w1, vertical = TRUE, method = "jitter", pch = 16,
+           xlab = "Treatment (0 = control)", ylab = "Wireworms per plot")
+boxplot(count ~ row, data = w1, xlab = "Row", ylab = "Wireworms per plot")
+boxplot(count ~ col, data = w1, xlab = "Column", ylab = "Wireworms per plot")
+par(mfrow = c(1, 1))
 ```
 
-## Exercises
-
-Work through the following and show your code and output for each.
-
-1. *(exercise 1 --- edit me)*
-2. *(exercise 2 --- edit me)*
-3. *(exercise 3 --- edit me)*
-
-## Submission questions
-
-Answer in complete sentences below each question. These responses, together
-with your code above, are graded against this lab's key deliverable:
-**Model structure & DAGs / worksheets**.
-
-**Q1.** *(question --- edit me)*
-
-> *(your answer here)*
-
-**Q2.** *(question --- edit me)*
-
-> *(your answer here)*
-
-**Q3.** *(question --- edit me)*
-
-> *(your answer here)*
-
-## Submission checklist
-
-- [ ] Code chunks all run top-to-bottom without error (Knit ▸ Knit to HTML)
-- [ ] All placeholder text above has been replaced
-- [ ] Submission questions answered in full sentences
-- [ ] File renamed / submitted per course LMS instructions
-
----
-
-```{r session-info}
-sessionInfo()
+```{r d1-spread, fig.height=3.4, fig.cap="Variance against mean for each treatment (data set 1)."}
+m1 <- tapply(w1$count, w1$trtmnt, mean)       # mean count per treatment
+v1 <- tapply(w1$count, w1$trtmnt, var)        # variance per treatment
+round(rbind(mean = m1, variance = v1, variance_over_mean = v1 / m1), 2)
+plot(m1, v1, pch = 16, xlab = "Treatment mean", ylab = "Treatment variance")
 ```
+
+**Questions (Lab 9a, data set 1)**
+
+1. Does each treatment occur in each row and in each column? What is this design called, and what are the experimental units?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+2. Which of the columns `trtmnt`, `row`, `col` look numeric but must be treated as categories? Why?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+3. Fill in the table of variables.
+
+| Variable | Symbol | Units | Scale type | Role |
+|:--|:--|:--|:--|:--|
+| Wireworm count per plot |  |  |  |  |
+| Treatment |  |  |  |  |
+| Row |  |  |  |  |
+| Column |  |  |  |  |
+
+4. Write the model in GLM format. Can any interaction term be estimated? Why or why not?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+>
+> \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+Treatment ($T$) is Fixed because the 5 specific treatment levels (Control and 4 soil fumigants) were deliberately chosen on purpose by the experimenter
+
+Row ($R$) and Column ($C$) are Random because they act as factors representing spatial location variations within the $5 \times 5$ field grid. The researcher does not care about testing Row 1 versus Row 4 as specific treatments of interest.
+
+5. Count variation relative to both random factors, Pct variance = (SS$_{rows}$ + SS$_{cols}$) / SS$_{total}$. Calculate it (model with rows and columns only).
+
+```{r d1-pct}
+# Hint: fit count against the factors row and col only (no treatment), look at the SS column of anova(),
+# then use the sums of squares in the formula above.
+a1 <- anova(lm(count ~ factor(row) + factor(col), data = w1))
+a1
+SS_rows = a1["factor(row)", "Sum Sq"]
+SS_rows
+SS_cols = a1["factor(col)", "Sum Sq"]
+SS_cols
+SS_total = sum(a1[, "Sum Sq"])
+100*(SS_rows + SS_cols)/SS_total
+(a1["factor(row)", "Sum Sq"] + a1["factor(col)", "Sum Sq"]) / sum(a1[, "Sum Sq"]) * 100   # per cent
+```
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+3 sources of variation: (1) Random error (2) Treatment (3) location of the plot (soil)
+
+This tells us how much of the variation in wireworm counts is attributable to where the plot sits in the field, rather than to the treatment or random error? They were built into the design because the researchers expected the field to vary, for example in soil, moisture or wireworm density. 
+
+About 34% of the variation in counts is associated with a plot’s row and column position. Including rows and columns in the model removes this variation from the error term, giving a more precise test of the treatment effect.
+
+## Data set 2: the wireworm experiment repeated one year later (wworm2)
+
+Snedecor and Cochran (1980) p. 273. The same experiment (same 5 treatments, 5 x 5 Latin square) **repeated one year later**.
+This design does not have a name, so you cannot look it up: use what you have learned to set it up.
+
+**Take a look at the data first** before exploring
+
+```{r d2-import}
+w2 <- latin_long(read_raw("wworm2.txt", nrows = 5))   # same layout as wworm1.txt
+str(w2)
+with(w2, tapply(trtmnt, list(row = row, col = col), identity))   # layout in year 2
+# Treatment layout
+with(w2, tapply(count,  list(row = row, col = col), identity))   # counts in year 2
+# Count layout
+```
+
+```{r d2-both, fig.width=7, fig.height=3.8, fig.cap="Wireworm counts by treatment in the two years."}
+both <- rbind(data.frame(w1, year = "1"), data.frame(w2, year = "2"))   # the two experiments in one data frame
+par(mfrow = c(1, 2))
+stripchart(count ~ trtmnt, data = both[both$year == "1", ], vertical = TRUE, method = "jitter", pch = 16,
+           ylim = range(both$count), main = "Year 1", xlab = "Treatment", ylab = "Wireworms per plot")
+stripchart(count ~ trtmnt, data = both[both$year == "2", ], vertical = TRUE, method = "jitter", pch = 16,
+           ylim = range(both$count), main = "Year 2", xlab = "Treatment", ylab = "Wireworms per plot")
+par(mfrow = c(1, 1))
+round(tapply(both$count, list(year = both$year, trt = both$trtmnt), mean), 1)   # means by year and treatment
+round(tapply(both$count, both$year, var), 1)                                     # variance in each year
+```
+
+**Questions (Lab 9a, data set 2)**
+
+1. How is this experiment related to data set 1? How would you call this experimental design? Which variable is new?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+2. Is Year fixed or random? Are rows and columns the same plots in both years, or new blocks? (State your assumption.)
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+>
+> \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+> **Answer.** Year is **fixed** (only two levels). Rows and columns are treated as **blocks nested within year** (each year has its own 5 x 5 layout, with treatments re-randomised): R(Year), C(Year).
+
+3. Fill in the table of variables.
+
+| Variable | Symbol | Units | Scale type | Role |
+|:--|:--|:--|:--|:--|
+| Wireworm count per plot |  |  |  |  |
+| Treatment |  |  |  |  |
+| Year |  |  |  |  |
+| Row (within year) |  |  |  |  |
+| Column (within year) |  |  |  |  |
+
+4. Write the model in GLM format. Which interaction can be estimated, and what question does it answer?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+>
+> \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+5. Pct variance in rows and columns for data set 2 alone: (SS$_{rows}$ + SS$_{cols}$) / SS$_{total}$.
+
+```{r d2-pct}
+# Hint: as for data set 1, using w2
+a2 <- anova(lm(count ~ factor(row) + factor(col), data = w2))
+(a2["factor(row)", "Sum Sq"] + a2["factor(col)", "Sum Sq"]) / sum(a2[, "Sum Sq"]) * 100
+```
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+6. Heterogeneity: compare the two years (means and variances above). How severe is it, and what action would you plan?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+>
+> \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## Data set 3: leprosy bacilli before and after treatment (leprosy)
+
+Snedecor and Cochran (1980) p. 368. Scores of leprosy bacilli **before (B)** and **after (A)** treatment with two antibiotics (TRI, TRII)
+and one control, 10 patients per treatment.
+
+**Take a look at the data first** before exploring
+
+
+```{r d3-import}
+lp_raw <- read_raw("LeprosyScores.txt", nrows = 10)   # raw file: 10 lines x 6 numbers
+lp_raw                                                  # columns: before/after for TRI, TRII, Control
+lp <- leprosy_long(lp_raw)                              # one row per patient
+str(lp)
+head(lp, 10)
+```
+
+```{r d3-explore, fig.width=7, fig.height=3.8, fig.cap="Leprosy: after against before (left) and scores by treatment (right)."}
+lp$treatment <- factor(lp$treatment, levels = c("Control", "TRI", "TRII"))   # label order: control first
+cols <- c(Control = "black", TRI = "red", TRII = "blue")
+par(mfrow = c(1, 2))
+plot(lp$before, lp$after, pch = 16, col = cols[as.character(lp$treatment)],
+     xlab = "Score before treatment", ylab = "Score after treatment")
+abline(0, 1, lty = 2)                                   # no change line
+legend("topleft", legend = names(cols), col = cols, pch = 16, bty = "n")
+boxplot(after ~ treatment, data = lp, xlab = "Treatment", ylab = "Score after treatment")
+par(mfrow = c(1, 1))
+round(rbind(mean_before = tapply(lp$before, lp$treatment, mean),
+            mean_after  = tapply(lp$after,  lp$treatment, mean),
+            sd_after    = tapply(lp$after,  lp$treatment, sd)), 2)
+```
+
+**Questions (Lab 9a, data set 3)**
+
+1. State the research question.
+
+> **Example Answer.** Do the antibiotics (TRI, TRII) reduce leprosy bacilli scores compared with the control, taking each patient's starting level into account?
+
+2. List the variables, with symbol, units, scale type and role, for the model you consider best.
+
+| Variable | Symbol | Units | Scale type | Role |
+|:--|:--|:--|:--|:--|
+| Score after treatment |  |  |  |  |
+| Score before treatment |  |  |  |  |
+| Treatment |  |  |  |  |
+
+3. List **at least three different models** that could answer the question, with the response variable and explanatory variables of each.
+   For each, write the model in GLM format and say what assumption it makes about the before score.
+
+| Model | Response | Explanatory | GLM format | Assumption about the before score |
+|:--|:--|:--|:--|:--|
+| M1 | | | | |
+| M2 | | | | |
+| M3 | | | | |
+| M4 | | | | |
+
+3. List **at least three different models** that could answer the question, with the response variable and explanatory variables of each.
+   For each, write the model in GLM format and say what assumption it makes about the before score.
+
+| Model | Response | Explanatory | GLM format | Assumption about the before score |
+|:--|:--|:--|:--|:--|
+| M1 | A | Trt | $A = \beta_0 + Trt + \epsilon$ | Ignored |
+| M2 | change = A - B | Trt | $(A-B) = \beta_0 + Trt + \epsilon$ (one-way ANOVA) | Effect of B on A is exactly 1:1 (slope fixed at 1) |
+| M3 | A | B (covariate) + Trt | $A = \beta_0 + \beta B + Trt + \epsilon$ (**ANCOVA**) | Slope estimated from the data; assumes the same slope in all groups |
+
+4. Which model would you choose first, and why? What check would you make on the *before* variable and on the slopes?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+>
+> \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+5. Heterogeneity: is it likely to be a problem here? How severe? What action do you plan?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+>
+> \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## Lab 9a hand-in checklist
+
+* For each of the three data sets: the **table of variables** (symbol, units, scale type, role incl. fixed/random/covariate), the **model in GLM format**, and the decision about interactions.
+* A short statement on **heterogeneity** and the action you plan.
+* Data set 3: at least three candidate models and the one you chose first.
+* (Honours students with their own data set: a short paragraph describing how the data were collected.)
+
+Lab 9b (next week): execute these analyses (steps 2 to 9).
+
+Step 2. Execute the model
+
+Step 3. Evaluate the assumptions: Residuals homogeneous? Residuals normal?
+
+A square-root transformation is the usual remedy for counts
+
+Step 4. Report, df, Sum of Squares and likelihood ratio
+
+Step 7. Full ANOVA table
+
+Step 9. Decisions and conclusion
+
+
