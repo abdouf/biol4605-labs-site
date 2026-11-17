@@ -156,7 +156,7 @@ labs:
     focus: "Experimental setup & data structuring. Formulating research questions into verifiable statistical architecture prior to execution."
     deliverable: "Model structure & DAGs / worksheets"
     software: "R Markdown planning worksheet (no analysis code yet)"
-    rmd_file: "rmd/lab09a-problem-solving-setup.Rmd"
+    rmd_file: "rmd/lab09a-problem-solving-setup-ANSWER.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
     downloadable: true
 
