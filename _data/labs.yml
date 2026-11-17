@@ -172,7 +172,7 @@ labs:
     software: "Full tidyverse + lm()/glm() pipeline"
     rmd_file: "rmd/lab09b-problem-solving-execution.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
+    downloadable: true
 
   - week: 9
     week_padded: "09"

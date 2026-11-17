@@ -1,150 +1,572 @@
 ---
-title: "Lab 9b: Problem-Solving with GLM (Execution)"
-subtitle: "BIOL/OCSC 4605 · 7220 --- Statistical Analysis in Biology and Environmental Science"
-author: "Student Name (replace)"
-date: "`r format(Sys.Date(), '%d %B %Y')`"
+title: "Lab 9b. Problem-Solving with the GLM: II. Executing the analysis (starter)"
+subtitle: "BIOL/OCSC 4605 / 7220 - base R"
+author: "Your name here"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
 output:
   html_document:
     toc: true
     toc_float: true
-    number_sections: false
-    code_folding: show
-    theme: flatly
-    css: ../assets/css/course.css
-    self_contained: true
-params:
-  week: 8
-  module: "Parts 3–5: Applied Integration"
-  due_date: "YYYY-MM-DD"
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    extra_dependencies: ["fvextra"]
+fontsize: 11pt
+geometry: margin=1in
 ---
-
-<!--
-  ============================================================================
-  STANDARD LAB TEMPLATE — BIOL/OCSC 4605 · 7220
-  ============================================================================
-  This file was generated from templates/lab_template.Rmd. Keep the section
-  structure and YAML options consistent across labs so students always know
-  where to look. Replace every "(edit me)" / placeholder comment before
-  distributing this lab.
-
-  To regenerate ALL 13 labs from an updated version of this template, edit
-  templates/lab_template.Rmd and re-run the generator script described in the
-  repo README, then re-apply any lab-specific edits you had made.
-  ============================================================================
--->
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE, message = FALSE, warning = FALSE,
-  fig.width = 6, fig.height = 4
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center", fig.width = 6, fig.height = 4)
+```
+
+```{r wrap, echo=FALSE, results='asis'}
+# PDF only: wrap long code lines instead of letting them run off the page
+if (knitr::is_latex_output())
+  cat("\\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\\\\{\\}}")
+options(digits = 5)
+set.seed(4605)
+```
+
+# How to use this file
+
+**Lab 9b starter.** You now execute the analyses you set up in Lab 9a. The data are read in for you; everything else (factor conversions, models, plots, decisions) is yours. Each step has an empty code chunk with hints and an `Your answer` line. Together with your Lab 9a step 1 this is your write-up.
+
+* The data are the **raw files** from the course website: `wworm1.txt`, `wworm2.txt` and `LeprosyScores.txt`.
+
+## Reading the raw data
+
+```{r data-helpers}
+# Where the raw data files live on the course website
+data_url <- "https://raw.githubusercontent.com/DavidCSchneider/StatisticalScience/refs/heads/main/Data/Labs/"
+
+# Read the first `nrows` lines of a raw text file (the files end with free-text notes that we skip).
+# If the file is in your working folder it is used; otherwise it is downloaded from the website.
+read_raw <- function(file, nrows) {
+  src <- if (file.exists(file)) file else paste0(data_url, file)
+  read.table(src, nrows = nrows)
+}
+
+# Latin square files: 5 lines (= rows of the field) x 10 numbers = 5 pairs (T, N), one pair per column of the field.
+# as.vector() reads a matrix column by column, so row varies fastest, as in the Minitab "stack" commands.
+latin_long <- function(raw) {
+  m <- as.matrix(raw)
+  data.frame(plot   = 1:25,
+             trtmnt = as.vector(m[, seq(1, 9, by = 2)]),   # T: treatment code (0 = control, 1-4 = fumigants)
+             count  = as.vector(m[, seq(2, 10, by = 2)]),  # N: wireworms per plot
+             col    = rep(1:5, each = 5),
+             row    = rep(1:5, times = 5))
+}
+
+# Leprosy file: 10 patients (lines) x 6 numbers = (before, after) for TRI, TRII and Control side by side.
+leprosy_long <- function(raw) {
+  m <- as.matrix(raw)
+  data.frame(patient   = 1:30,                    # 30 different patients
+             treatment = rep(c("TRI", "TRII", "Control"), each = 10),
+             before    = c(m[, 1], m[, 3], m[, 5]),
+             after     = c(m[, 2], m[, 4], m[, 6]))
+}
+```
+
+## The recipe (Lab 9b write-up, handout)
+
+| Step | What to do |
+|:--|:--|
+| 1 | **Construct the model**: list response and explanatory variables; assign symbols, units and scale type; write the statistical model (Lab 9a). |
+| 2 | **Execute the model** and plot the residuals against the fitted values. |
+| 3 | **Evaluate assumptions**: residuals homogeneous (residual vs fit plot)? normal (histogram, quantile or normal score plot)? If not met, a randomization p-value may be necessary. |
+| 4 | **ANOVA**: show source, df, SS; calculate the likelihood ratio (LR) for the full model (all terms). If the evidence is negligible (LR < 20) report LR and the table; otherwise go on to step 7. |
+| 7 | **ANOVA**: calculate MS, F and the Type I error (p-values); report the full table. |
+| 9 | **Decisions**: first any **interaction** terms (p < alpha: reject H0; p >= alpha: cannot reject). If significant, interpret. If interactions are not significant, decide about the fixed factors and regression terms, then report slopes or means for the significant terms. |
+
+**The three data sets.** All three are **counts**. Counts often have heterogeneous errors (the variance grows with the mean), so you must judge how severe the heterogeneity is, what to do about it, and whether a recomputed p-value by randomization is needed.
+
+Data source: Snedecor and Cochran (1980) *Statistical Methods*, 7th ed., Iowa State University Press.
+
+\newpage
+
+# Part 2 (Lab 9b): Executing the analyses
+
+```{r b-import}
+w1 <- latin_long(read_raw("wworm1.txt", nrows = 5))
+w2 <- latin_long(read_raw("wworm2.txt", nrows = 5))
+lp <- leprosy_long(read_raw("LeprosyScores.txt", nrows = 10))
+str(w1)
+str(w2)
+str(lp)
+```
+
+Before fitting any model, convert the variables you decided are categories (Lab 9a) into factors.
+Hints: `factor()`; `rbind()` and `data.frame()` to combine the two years; a column `year`.
+
+## Data set 1 (wworm1): Latin square
+
+**Step 1 (from Lab 9a).** Model: paste your model here: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### Step 2. Execute the model and plot residuals against fitted values
+
+```{r d1b-model}
+# Hints: factor() for trtmnt, row, col; lm(); fitted(); resid().
+# Model formula: response ~ explanatory terms (no interactions for a Latin square).
+# Transform treatment into a true factor variable: 0 = control   1,2,3,4  = 4 soil fumigants
+# w1$trtmnt <- factor(w1$trtmnt, levels = 0:4, labels = c("Control", "Fum1", "Fum2", "Fum3", "Fum4"))
+if (!is.factor(w1$trtmnt)) {
+  w1$trtmnt <- factor(w1$trtmnt, levels = 0:4,
+                      labels = c("Control", "Fum1", "Fum2", "Fum3", "Fum4"))
+}
+# Set row as factor
+w1$row <- factor(w1$row)
+# Set column as factor
+w1$col <- factor(w1$col)
+
+# Name the model W1mod and write the equation in R with lm() = linear model
+W1mod <- lm(count ~ trtmnt + row + col, data = w1)     # Latin square: additive model
+# Compute the fitted values \hatYi
+W1fit <- fitted(W1mod)
+# Compute the residuals e_i
+W1res <- resid(W1mod)
+```
+
+```{r d1b-resid, fig.width=7, fig.height=3.8, fig.cap="Data set 1: residuals vs fitted (left) and normal scores (right)."}
+# Hints: plot(fitted, residuals); abline(h = 0); qqnorm(); qqline()
+# Set R graphics layout to a 1-row by 2-column
+par(mfrow = c(1, 2)) 
+# Plot residuals (W1res) against fitted values (W1fit)
+# Then add a horizontal dashed reference line (lty = 2) at y = 0 (h = 0)
+# representing zero residual error
+plot(W1fit, W1res, xlab = "fitted values", ylab = "residuals", main = "Residuals vs fits"); abline(h = 0, lty = 2)
+
+# Generate a normal quantile-quantile (Q-Q) plot of the residuals (W1res) 
+# assess whether errors follow a normal distribution:
+#    qqnorm() : plots sample residual quantiles against theoretical standard normal quantiles
+#.   qqline() : overlays a reference line passing through the 1st and 3rd quartiles
+#               points should fall close to this line if residuals are normal
+qqnorm(W1res, main = "Normal scores")
+qqline(W1res)
+
+# Reset the graphics layout back to the default single-panel (1x1) grid so
+# subsequent plots are not drawn side by side
+par(mfrow = c(1, 1))
+```
+
+### Step 3. Evaluate the assumptions
+
+Are the Residuals homogeneous?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+Are the Residuals normal?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### Step 4. ANOVA: source, df, SS and the likelihood ratio
+
+```{r d1b-lr}
+# Hints: anova(model) gives source, df and SS; LR = (1 - r2)^(-n/2) with r2 = summary(model)$r.squared
+A1 <- anova(W1mod)
+A1
+A1[, c("Df", "Sum Sq")]                           # source, df, SS
+r2_1 <- summary(W1mod)$r.squared
+n_1  <- nrow(w1)
+c(r_squared = r2_1, n = n_1, LR = (1 - r2_1)^(-n_1 / 2))   # LR for the full model (all terms)
+```
+
+The LR asks the following question: is this model, taken as a whole, any better at explaining the data than a model with no explanatory variables at all?
+
+If LR < 20: the model as a whole barely beats the null model. There is nothing convincing to explain, so there is no point testing individual terms one by one. You report the LR and the ANOVA table (source, df, SS) and stop at step 4.
+
+If LR ≥ 20: the model explains something real, so you move on to step 7 and test which terms (treatment, interaction, covariate) are responsible.
+
+> **Answer.** Report the likelihood ratio and conclude.
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### Step 7. Full ANOVA table: MS, F and p
+
+```{r d1b-anova}
+# anova(model)
+A1
+```
+
+> **Answer.** Report the F-values and P-values for each factor and MS error of Residuals
+
+T: F = 2.90 with p = 0.068; 
+Rows: F = 2.37 with p = 0.11; 
+Columns: F = 0.62 with p = 0.66; 
+Error MS = 8.9 (12 df).
+
+### Is a randomization p-value needed? (step 3 follow-up)
+
+(1) Assumptions are only moderately met
+(2) n = 25 is below 30 and p = 0.068 is close to 0.05
+
+Is a randomization p-value needed ?
+
+> **Answer.** : ?
+
+Shuffle the treatment labels and recompute F for treatment (after rows and columns).
+
+```{r d1b-rand}
+# This code performs a randomization (permutation) test of the treatment effect (trtmnt) while controlling for row and col effects.
+# The treatments were NOT assigned completely at random: in a Latin square every treatment occurs once in every row
+# and once in every column. A plain sample(w1$trtmnt) would break this (the same treatment could appear twice in a row
+# or column), so the shuffles must keep the Latin-square structure.
+# (1) Arrange the observed treatments in a 5 x 5 matrix (rows x columns).
+# (2) Permute the rows and the columns of that matrix at random: every result is again a Latin square.
+#     (Permuting the treatment labels as well would not change F, because F does not depend on which label names which group.)
+# (3) Refit the model with the re-randomized treatments (ts) and extract the F-statistic for treatment.
+# (4) The randomization p-value is the proportion of the shuffled F-statistics that are >= the observed F-statistic.
+
+# 1. Arrange the observed treatments into a 5x5 matrix indexed by row and column
+T_mat <- matrix(NA, nrow = 5, ncol = 5,
+                dimnames = list(levels(w1$row), levels(w1$col)))
+T_mat[cbind(as.character(w1$row), as.character(w1$col))] <- as.character(w1$trtmnt)
+
+# 2. Compute observed F-statistic and restricted Latin-square null distribution
+nrep <- 100
+obs_F1 <- anova(lm(count ~ row + col + trtmnt, data = w1))["trtmnt", "F value"]
+
+rand_F1 <- replicate(nrep, {
+  # Permute rows and columns independently to preserve the Latin square structure
+  T_perm <- T_mat[sample(5), sample(5)]
+  # Look the treatments up by POSITION (as.integer): by name (as.character) would undo the shuffle,
+  # because the row and column names are permuted together with the cells
+  w1$ts  <- factor(T_perm[cbind(as.integer(w1$row), as.integer(w1$col))])
+  anova(lm(count ~ row + col + ts, data = w1))["ts", "F value"]
+})
+
+c(F_observed = obs_F1, p_randomization = mean(rand_F1 >= obs_F1))
+```
+
+
+F_observed is the F-statistic for the treatment effect from the true data. It measures how much of the variation in counts is explained by differences among the treatment, relative to the unexplained error variation.
+
+p_randomization: It is the proportion of the shuffled F-values that are greater than or equal to F_observed
+p_randomization ≈ 0.1 means that about 10% of random Latin-square layouts produce an F as large as 2.90
+
+If the treatments had no effect, about 10% of random Latin-square layouts would produce an F as large as F_observed or larger. That is more than 5%, so we cannot rule out chance as the explanation and we do not reject H0. The evidence is borderline.
+
+> **Answer.** Randomization p $\approx$ 0.08 (F-distribution p = 0.068): a borderline result
+
+As a **check on the scale of measurement**, repeat the analysis on square-root counts (variance-stabilizing for counts):
+
+```{r d1b-sqrt}
+# Hint: sqrt(count) as the response
+# Transform the response count as square root
+anova(lm(sqrt(count) ~ trtmnt + row + col, data = w1))
+```
+
+> **Answer.** On the square-root scale the treatment effect is significant?:
+Report F-statistics F(df 4 and 12) = ? with p-value = ?
+
+### Step 9. Decisions
+
+Interaction terms: none in this model. Treatment (fixed factor):
+
+> **Answer.** On the raw counts p = ? 
+p-randomization = ?
+**Decision: **
+On the square-root scale p = ?
+**Decision: **. 
+
+Means for the treatment (raw counts) and interpretation:
+
+```{r d1b-means}
+# Hint: tapply(count, trtmnt, mean)
+round(tapply(w1$count, w1$trtmnt, mean), 2)
+```
+
+> **Answer.** Control 5.8, Fum1 6.2, Fum2 7.0, **Fum3 1.2**, Fum4 4.6 wireworms per plot. Only fumigant 3 clearly lowers counts; fumigant 2 is not lower than the control.
+
+## Data set 2 (wworm2): two Latin squares (year 1 and year 2)
+
+**Step 1 (from Lab 9a).** Model: paste your model here: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### Step 2. Execute the model
+
+```{r d2b-model}
+# Hints: combine the two data frames with rbind() after adding a year column; make year a factor.
+# Nested blocks: year:row and year:col; the interaction of interest: year:trtmnt (put terms in this order:
+# year, blocks, treatment, interaction).
+# w2$trtmnt <- factor(w2$trtmnt, levels = 0:4, labels = c("Control", "Fum1", "Fum2", "Fum3", "Fum4"))
+if (!is.factor(w2$trtmnt)) {
+  w2$trtmnt <- factor(w2$trtmnt, levels = 0:4,
+                      labels = c("Control", "Fum1", "Fum2", "Fum3", "Fum4"))
+}
+w2$row <- factor(w2$row); w2$col <- factor(w2$col)
+both <- rbind(data.frame(w1[, c("trtmnt", "count", "row", "col")], year = "1"),
+              data.frame(w2[, c("trtmnt", "count", "row", "col")], year = "2"))
+both$year <- factor(both$year)
+
+W2mod <- lm(count ~ year + year:row + year:col + trtmnt + year:trtmnt, data = both)   
+# rows, columns nested in year
+W2fit <- fitted(W2mod)
+W2res <- resid(W2mod)
+```
+
+```{r d2b-resid, fig.width=7, fig.height=3.8, fig.cap="Data set 2 (both years): residuals vs fitted (left) and normal scores (right), raw counts."}
+# Hints: as for data set 1
+par(mfrow = c(1, 2))
+plot(W2fit, W2res, xlab = "fitted values", ylab = "residuals", main = "Residuals vs fits"); abline(h = 0, lty = 2)
+qqnorm(W2res, main = "Normal scores"); qqline(W2res)
+par(mfrow = c(1, 1))
+cor(W2fit, abs(W2res))
+```
+
+### Step 3. Evaluate the assumptions
+
+What was our remedy, dealing with the residuals for data 1 ?
+
+A square-root transformation is the usual remedy for counts. 
+
+```{r d2b-sqrt, fig.width=7, fig.height=6.5, fig.cap="Data set 2: the same diagnostics on the raw scale (top row) and the square-root scale (bottom row)."}
+# Hint: refit the same model with sqrt(count) as the response and compare the residual vs fit plots
+W2sq <- lm(sqrt(count) ~ year + year:row + year:col + trtmnt + year:trtmnt, data = both)
+W2sqfit <- fitted(W2sq)
+W2sqres <- resid(W2sq)
+
+# 2 x 2 layout: top row = raw counts, bottom row = square-root counts
+par(mfrow = c(2, 2))
+# Top row: raw counts
+plot(W2fit, W2res, xlab = "fitted values", ylab = "residuals", main = "Raw counts: residuals vs fits"); abline(h = 0, lty = 2)
+qqnorm(W2res, main = "Raw counts: normal scores"); qqline(W2res)
+# Bottom row: square-root counts
+plot(W2sqfit, W2sqres, xlab = "fitted values", ylab = "residuals", main = "Square root: residuals vs fits"); abline(h = 0, lty = 2)
+qqnorm(W2sqres, main = "Square root: normal scores"); qqline(W2sqres)
+par(mfrow = c(1, 1))
+
+# Correlation of the fitted values with the absolute residuals (0 = no fan shape): before and after
+round(c(raw = cor(W2fit, abs(W2res)), sqrt = cor(W2sqfit, abs(W2sqres))), 2)
+```
+
+
+Residuals homogeneous? Residuals normal?
+
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+>
+> \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+
+### Step 4. Source, df, SS and likelihood ratio
+
+```{r d2b-lr}
+# Hints: anova(); LR = (1 - r2)^(-n/2)
+A2 <- anova(W2mod)
+A2[, c("Df", "Sum Sq")]
+r2_2 <- summary(W2mod)$r.squared; n_2 <- nrow(both)
+c(r_squared = r2_2, n = n_2, LR = (1 - r2_2)^(-n_2 / 2))
+
+A2sq <- anova(W2sq)
+A2sq[, c("Df", "Sum Sq")]
+sqr2_2 <- summary(W2sq)$r.squared; n_2 <- nrow(both)
+c(r_squared = sqr2_2, n = n_2, LR = (1 - sqr2_2)^(-n_2 / 2))
+```
+
+> **Answer.** LR =  (>> 20): 
+
+Can you move to factor by factor analysis?
+
+
+### Step 7. Full ANOVA table
+
+```{r d2b-anova}
+# anova(model)
+anova(W2mod)
+anova(W2sq)
+```
+
+
+> **Answer.** Raw counts: Year F(1,24) = 51.4, p < 0.0001; 
+> **Treatment F(4,24) = 5.45, p = 0.0029**
+> **Year x Treatment F(4,24) = 1.18, p = 0.34**; 
+> R(Year) p = 0.43; C(Year) p = 0.22. 
+
+> Square-root scale: Treatment F-value = 6.72, p = 0.0009; 
+> Year x Treatment F-value = 0.73, p-value = 0.58.
+
+Randomization (shuffle the treatment labels **within each year**):
+
+```{r d2b-rand}
+# Hints: shuffle the treatment labels within each year (ave() with FUN = sample); refit; p = mean(F_random >= F_observed)
+# Hints: same idea as data set 1, applied to each year's Latin square separately
+# 1. Arrange the observed treatments of each year into a 5x5 matrix indexed by row and column
+T1 <- matrix(NA, nrow = 5, ncol = 5, dimnames = list(levels(w1$row), levels(w1$col)))
+T1[cbind(as.character(w1$row), as.character(w1$col))] <- as.character(w1$trtmnt)   # year 1 (wworm1)
+T2 <- matrix(NA, nrow = 5, ncol = 5, dimnames = list(levels(w2$row), levels(w2$col)))
+T2[cbind(as.character(w2$row), as.character(w2$col))] <- as.character(w2$trtmnt)   # year 2 (wworm2)
+
+# 2. Observed F-statistic for treatment and the restricted null distribution
+nrep <- 100
+obs_F2 <- anova(W2mod)["trtmnt", "F value"]
+
+rand_F2 <- replicate(nrep, {
+  # Permute rows and columns independently WITHIN each year (keeps each year a Latin square)
+  P1 <- T1[sample(5), sample(5)]
+  P2 <- T2[sample(5), sample(5)]
+  # 'both' is year 1 followed by year 2, in the same plot order as w1 and w2
+  # Look up by POSITION (as.integer), not by name: the names are permuted together with the cells
+  both$ts <- factor(c(P1[cbind(as.integer(w1$row), as.integer(w1$col))],
+                      P2[cbind(as.integer(w2$row), as.integer(w2$col))]))
+  anova(lm(count ~ year + year:row + year:col + ts + year:ts, data = both))["ts", "F value"]
+})
+
+c(F_observed = obs_F2, p_randomization = mean(rand_F2 >= obs_F2))
+```
+
+
+> **Answer.** Randomization p $\approx$ 0.003 (re-randomizing each year's Latin square), in agreement with p = 0.003 from the F-distribution: the decision does not depend on the method.
+
+### Step 9. Decisions
+
+Interaction first:
+
+> **Answer.** **Year x Treatment**: p-value for raw data = ?, p-value for square-root transformed data =
+> Decision: reject $H_0$ ?: 
+> Conclusion: evidence or no that the treatment effects differed between years.
+
+Then the fixed factors (no significant interaction):
+
+> **Answer.** **Treatment: p-value for raw data = ?, p-value for square-root transformed data =
+> Decision: reject $H_0$?** 
+> **Year: reject $H_0$ ?** Rows and columns within year: not significant.
+
+Means for the significant terms (average over years, from the model without the interaction) and interpretation:
+
+```{r d2b-means}
+# Hints: tapply(count, trtmnt, mean); standard error = sqrt(MSE / n); summary(model)$coef for contrasts vs the control
+W2red <- lm(count ~ year + year:row + year:col + trtmnt, data = both)      # interaction dropped
+MSE  <- anova(W2red)["Residuals", "Mean Sq"]
+tm   <- tapply(both$count, both$trtmnt, mean)
+round(rbind(mean = tm, SE = sqrt(MSE / 10)), 2)                              # 10 plots per treatment
+round(tapply(both$count, both$year, mean), 2)                                # year means
+round(summary(W2red)$coef[grep("trtmnt", rownames(summary(W2red)$coef)), ], 4)   # each fumigant vs control
+```
+
+> **Answer.** Mean counts per plot over the two years: Control 10.7, Fum1 9.6, Fum2 14.4, **Fum3 4.8**, Fum4 9.0 (SE about 1.4); year 1 mean 4.9, year 2 mean 14.4. Only **fumigant 3** is clearly lower than the control (about 55 % fewer wireworms); the effect is consistent in both years. Combining the two years turns the borderline year-1 result (p = 0.07) into a clear one (year 2 alone: p = 0.044).
+
+## Data set 3 (leprosy): ANCOVA and alternative models
+
+**Step 1 (from Lab 9a).** Model chosen first: paste your model here: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### Step 2. Execute the model
+
+```{r d3b-model}
+# Hints: lm(after ~ before + treatment); first check before ~ treatment and the interaction before * treatment
+lp$treatment <- factor(lp$treatment, levels = c("Control", "TRI", "TRII"))
+
+anova(lm(before ~ treatment, data = lp))          # check: baseline score does not depend on treatment
+
+L_slopes <- lm(after ~ before * treatment, data = lp)     # does the slope differ among treatments?
+anova(L_slopes)
+
+L3 <- lm(after ~ before + treatment, data = lp)           # M3: ANCOVA with a common slope
+L3fit <- fitted(L3); L3res <- resid(L3)
+```
+Does baseline score depend on treatment?
+
+> **Answer.** Baseline score does not depend on treatment (F = 1.66, p = 0.21). 
+
+```{r d3b-resid, fig.width=7, fig.height=3.8, fig.cap="Leprosy ANCOVA: residuals vs fitted (left) and normal scores (right)."}
+# residual vs fit plot and normal scores plot
+par(mfrow = c(1, 2))
+plot(L3fit, L3res, xlab = "fitted values", ylab = "residuals", main = "Residuals vs fits"); abline(h = 0, lty = 2)
+qqnorm(L3res, main = "Normal scores"); qqline(L3res)
+par(mfrow = c(1, 1))
+cor(L3fit, abs(L3res))
+```
+
+
+### Step 3. Evaluate the assumptions
+
+Are residuals homogeneous?
+
+> **Answer.** Homogeneous:
+
+Are residuals normal?
+
+> **Answer.** points near the line?
+
+### Step 4. Source, df, SS and likelihood ratio
+
+```{r d3b-lr}
+# Hints: anova(); LR = (1 - r2)^(-n/2)
+anova(L3)[, c("Df", "Sum Sq")]
+r2_3 <- summary(L3)$r.squared; n_3 <- nrow(lp)
+c(r_squared = r2_3, n = n_3, LR = (1 - r2_3)^(-n_3 / 2))
+```
+Report the LR and conclude on wether we need to do the analysis factor by factor 
+
+> **Answer.** LR = 2.2 x 10$^7$ ($\geq$ 20).
+
+### Step 7. Full ANOVA table
+
+```{r d3b-anova}
+# anova(model)   (the order of terms matters: put the covariate first)
+anova(L3)       
+# the covariate is entered first, so treatment is tested adjusted for the baseline
+```
+
+> **Answer.** 
+> Before (covariate): F(degree of freedom ,) = ?, p-value < ?
+
+> **Treatment (adjusted): F(degree of freedom, 2,26) = 2.14, p-value = ?
+
+
+Is Randomization (shuffle treatment labels; refit with the covariate) needed?
+
+(1) p-value is far from the 0.05 cutoff. p = 0.14. A small error in the F-distribution p-value could not push it down to 0.05, so the decision (cannot reject H0) is safe.
+
+(2) The assumptions are reasonably met
+
+(3) The sample is adequate. n = 30 meets the lab’s rule of thumb (below 30 is where you worry about small sample).
+
+### Step 9. Decisions
+
+Interaction (before x treatment) is significant?:
+
+> **Answer.** **Cannot we reject $H_0$?**: 
+> Any evidence that the adjusted mean after-score differs among the control, TRI and TRII?
+
+Report the adjusted means (below) and the estimated slope.
+
+> Adjusted mean after-scores: Control = 10.2, TRI = 6.7, TRII = 6.8
+
+What does this mean?
+
+> The antibiotic groups are about 3.4 lower than the control but not significantly.
+
+```{r unified-table}
+# Unified table: baseline, raw after-score and baseline-adjusted after-score for each treatment
+
+# 1. The common baseline used for the adjustment: the average baseline score of all 30 patients
+before_all <- mean(lp$before)
+
+# 2. One hypothetical patient per treatment, all starting at that common baseline
+nd <- data.frame(before = before_all,
+                 treatment = factor(c("Control", "TRI", "TRII"), levels = levels(lp$treatment)))
+
+# 3. Adjusted means (and their standard errors) predicted by the ANCOVA model L3
+pred <- predict(L3, nd, se.fit = TRUE)
+
+# 4. Put everything side by side in one table
+adj_tab <- data.frame(
+  Treatment = levels(lp$treatment),
+  n         = as.vector(table(lp$treatment)),
+  Before    = as.vector(tapply(lp$before, lp$treatment, mean)),   # observed baseline mean
+  After_raw = as.vector(tapply(lp$after,  lp$treatment, mean)),   # observed after mean (not adjusted)
+  After_adj = pred$fit,                                           # after mean at the common baseline
+  SE_adj    = pred$se.fit
 )
+# Adjustment = how much the baseline correction moved each mean
+adj_tab$Adjustment <- adj_tab$After_adj - adj_tab$After_raw
+# Difference from the control: before and after adjusting
+adj_tab$Diff_raw <- adj_tab$After_raw - adj_tab$After_raw[1]
+adj_tab$Diff_adj <- adj_tab$After_adj - adj_tab$After_adj[1]
 
-# Packages used in this lab -- uncomment / extend as needed.
-# library(tidyverse)
-# library(emmeans)
-# library(car)
-# library(boot)
+adj_tab[, -1] <- round(adj_tab[, -1], 2)
+adj_tab
 
-set.seed(4605) # reproducible randomization / bootstrap results across labs
+# 5. The common baseline and the slope (change in after-score per 1-point increase in baseline)
+c(common_baseline = round(before_all, 2), slope = round(unname(coef(L3)["before"]), 2))
 ```
 
-## Learning objectives
-
-> Full analytical pipeline. Data cleaning, model fitting, model selection, diagnostic checking, and biological interpretation.
-
-By the end of this lab, you should be able to:
-
-1. *(objective 1 --- edit me)*
-2. *(objective 2 --- edit me)*
-3. *(objective 3 --- edit me)*
-
-**Module:** Parts 3–5: Applied Integration &nbsp;|&nbsp; **Week:** 8 &nbsp;|&nbsp; **Key deliverable:** Complete R script / R Markdown report
-
-> Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
-
-
-## Background
-
-*(One to two paragraphs of conceptual background specific to this lab. Link
-back to the relevant section of Schneider's*
-[*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/)*.)*
-
-## Data
-
-*(Describe or load the dataset used this week. Replace the placeholder code
-below with the actual read-in step, or remove it if this lab has no dataset,
-e.g. Lab 1's physical-cards exercise.)*
-
-```{r load-data}
-# df <- read.csv(here::here("data", "FILENAME.csv"))
-# str(df)
-```
-
-## Guided walkthrough
-
-### Step 1 --- *(edit me)*
-
-```{r step-1}
-
-```
-
-### Step 2 --- *(edit me)*
-
-```{r step-2}
-
-```
-
-### Step 3 --- *(edit me)*
-
-```{r step-3}
-
-```
-
-## Diagnostics / verification
-
-*(Residual plots, randomization overlays, homogeneity checks, or other
-verification appropriate to this lab's method. Primary tools this week:*
-`Full tidyverse + lm()/glm() pipeline`*.)*
-
-```{r diagnostics}
-
-```
-
-## Exercises
-
-Work through the following and show your code and output for each.
-
-1. *(exercise 1 --- edit me)*
-2. *(exercise 2 --- edit me)*
-3. *(exercise 3 --- edit me)*
-
-## Submission questions
-
-Answer in complete sentences below each question. These responses, together
-with your code above, are graded against this lab's key deliverable:
-**Complete R script / R Markdown report**.
-
-**Q1.** *(question --- edit me)*
-
-> *(your answer here)*
-
-**Q2.** *(question --- edit me)*
-
-> *(your answer here)*
-
-**Q3.** *(question --- edit me)*
-
-> *(your answer here)*
-
-## Submission checklist
-
-- [ ] Code chunks all run top-to-bottom without error (Knit ▸ Knit to HTML)
-- [ ] All placeholder text above has been replaced
-- [ ] Submission questions answered in full sentences
-- [ ] File renamed / submitted per course LMS instructions
-
----
-
-```{r session-info}
-sessionInfo()
-```
