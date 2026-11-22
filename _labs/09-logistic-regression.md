@@ -18,6 +18,11 @@ Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
 **Key deliverable:** Fitted logistic model with interpretation
 **Software / functions:** `glm(family = binomial)`
 
+This lab's instructions and exercises are Dr. David C. Schneider's original
+**"Logistic Regression (GLM) "** lab, unchanged from his site:
+
+[Open Lab 10 (PDF) on Dr. Schneider's site ↗](https://davidcschneider.github.io/StatisticalScience/Labs/Lab10.pdf){:target="_blank" .btn .btn-outline }
+
 ## Starter file
 
 {% assign this_lab = site.data.labs.labs | where: "week", 9 | first %}
