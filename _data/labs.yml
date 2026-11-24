@@ -186,7 +186,7 @@ labs:
     software: "glm(family = binomial)"
     rmd_file: "rmd/lab10-logistic-regression.Rmd"
     note: "Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM"
-    downloadable: false
+    downloadable: true
 
   - week: 10
     week_padded: "10"

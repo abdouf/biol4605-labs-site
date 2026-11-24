@@ -1,150 +1,471 @@
 ---
-title: "Lab 10: Logistic Regression (GLM)"
-subtitle: "BIOL/OCSC 4605 · 7220 --- Statistical Analysis in Biology and Environmental Science"
-author: "Student Name (replace)"
-date: "`r format(Sys.Date(), '%d %B %Y')`"
+title: "Lab 10. The Generalized Linear Model: Logistic Regression"
+subtitle: "BIOL/OCSC 4605 / 7220 - base R"
+author: "Your name here"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
 output:
   html_document:
     toc: true
     toc_float: true
-    number_sections: false
-    code_folding: show
-    theme: flatly
-    css: ../assets/css/course.css
-    self_contained: true
-params:
-  week: 9
-  module: "Part 5: The Generalized Linear Model"
-  due_date: "YYYY-MM-DD"
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    extra_dependencies: ["fvextra"]
+fontsize: 11pt
+geometry: margin=1in
 ---
-
-<!--
-  ============================================================================
-  STANDARD LAB TEMPLATE — BIOL/OCSC 4605 · 7220
-  ============================================================================
-  This file was generated from templates/lab_template.Rmd. Keep the section
-  structure and YAML options consistent across labs so students always know
-  where to look. Replace every "(edit me)" / placeholder comment before
-  distributing this lab.
-
-  To regenerate ALL 13 labs from an updated version of this template, edit
-  templates/lab_template.Rmd and re-run the generator script described in the
-  repo README, then re-apply any lab-specific edits you had made.
-  ============================================================================
--->
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE, message = FALSE, warning = FALSE,
-  fig.width = 6, fig.height = 4
-)
-
-# Packages used in this lab -- uncomment / extend as needed.
-# library(tidyverse)
-# library(emmeans)
-# library(car)
-# library(boot)
-
-set.seed(4605) # reproducible randomization / bootstrap results across labs
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center", fig.width = 6, fig.height = 4)
 ```
 
-## Learning objectives
-
-> Non-Gaussian response variables. Modeling binary/proportional biological outcomes using logit link functions.
-
-By the end of this lab, you should be able to:
-
-1. *(objective 1 --- edit me)*
-2. *(objective 2 --- edit me)*
-3. *(objective 3 --- edit me)*
-
-**Module:** Part 5: The Generalized Linear Model &nbsp;|&nbsp; **Week:** 9 &nbsp;|&nbsp; **Key deliverable:** Fitted logistic model with interpretation
-
-> Location: CSF BIOL 2218B Computer Lab · Time: 3:00–6:00 PM
-
-
-## Background
-
-*(One to two paragraphs of conceptual background specific to this lab. Link
-back to the relevant section of Schneider's*
-[*Statistical Science*](https://davidcschneider.github.io/StatisticalScience/)*.)*
-
-## Data
-
-*(Describe or load the dataset used this week. Replace the placeholder code
-below with the actual read-in step, or remove it if this lab has no dataset,
-e.g. Lab 1's physical-cards exercise.)*
-
-```{r load-data}
-# df <- read.csv(here::here("data", "FILENAME.csv"))
-# str(df)
+```{r wrap, echo=FALSE, results='asis'}
+# PDF only: wrap long code lines instead of letting them run off the page
+if (knitr::is_latex_output())
+  cat("\\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\\{\\}}")
+options(digits = 5)
+set.seed(4605)
 ```
 
-## Guided walkthrough
+# How to use this file
 
-### Step 1 --- *(edit me)*
+**Lab 10 starter.** Work through the handout (Lab10.pdf) in this file. Each section has a code chunk with hints and `Your answer` lines to complete. The data are typed in for you (8 rows from the handout).
 
-```{r step-1}
+* Base R only. Run chunk by chunk or **Knit**. There is **no data file to download**: the 8 rows of the table in the handout are entered in the first chunk.
+* The handout gives a few **check values** in each table (for example Table 1, bP = 111.5 and 121.5). Reproduce them first, then fill in the blanks.
+* Your parameter estimates will be **close to, but not exactly equal to**, the handout values ($\beta_{ref}$ = -6.107, $\beta_{bP}$ = 0.0245): the handout values are rounded and
+  were obtained with another program. Small differences in the 2nd or 3rd decimal of the expected values are normal.
 
+## The key relationships (read before starting)
+
+Each row of the data is a group of $N$ men with blood pressure $bP$. Among them, $N_{hd}$ developed heart disease. The response variable is a **proportion**.
+
+| Quantity | Formula | In words |
+|:--|:--|:--|
+| Morbidity | $p = N_{hd} / N$ | proportion of men with heart disease |
+| Odds | $odds = p / (1 - p)$ | heart disease cases per non-case (1-p) |
+| Odds ratio | $OR = odds / odds_{ref}$ | odds relative to the reference category (bP = 111.5) |
+| Linear predictor | $\eta = \beta_{ref} + \beta_{bP}\, bP$ | the model: $\eta = \log(odds)$ |
+| Expected odds | $E(odds) = e^{\eta}$ | back-transform the linear predictor |
+| Expected odds ratio | $E(OR) = e^{\beta_{bP}\,\Delta bP}$ | $\Delta bP$ = bP minus the reference bP (111.5) |
+| Expected morbidity | $E(p) = E(odds) / (1 + E(odds))$ | back from odds to a proportion |
+
+(1) The linear predictor ($\eta$) is a straight-line equation ($y = a + bx$), except instead of predicting the proportion of heart disease directly, it predicts the odds of heart disease for a given blood pressure on log scale log-odds ($\log(odds)$) for a given blood pressure.
+
+(2) $\beta_{ref}$ is the baseline log-odds at the reference blood pressure, and $\beta_{bP}$ is the slope, which is how much the log-odds change for every $1$-unit increase in blood pressure.
+
+The data are from Cornfield (1962), reported by Agresti (1990): $N$ = number of men aged 40 to 59 in the Framingham study, $N_{hd}$ = number who developed heart disease.
+
+\newpage
+
+# The data
+
+```{r data}
+Cornfield <- data.frame(
+  bP  = c(111.5, 121.5, 131.5, 141.5, 151.5, 161.5, 176.5, 191.5),   # blood pressure (mmHg)
+  N   = c(156, 252, 284, 271, 139, 85, 99, 43),                      # sample size (men)
+  Nhd = c(3, 17, 12, 16, 12, 8, 16, 8))                              # men who developed heart disease
+Cornfield
+str(Cornfield)
 ```
 
-### Step 2 --- *(edit me)*
+# Section 1. Preliminary calculations: observed morbidity, odds and odds ratios
 
-```{r step-2}
+Calculate the morbidity, the odds and the odds ratio for every blood pressure level. The reference category is bP = 111.5, so its odds ratio is 1 by definition.
+The handout shows the first two rows and the odds ratio at 151.5 (4.819) as checks.
 
+**Table 1.** Fill in all the blank cells. Someone explain the computation? 
+
+```{r t1}
+# (1) Morbidity: proportion of men with heart disease
+Cornfield$Morb = Cornfield$Nhd / Cornfield$N
+Cornfield$Morb
+#### (2) Odds = p / (1 - p)
+Cornfield$Odds <- Cornfield$Morb / (1 - Cornfield$Morb)
+#### (3) Odds ratio relative to the reference category (the first row, bP = 111.5)
+Cornfield$OR <- Cornfield$Odds / Cornfield$Odds[1]
+Table1 <- Cornfield[, c("bP", "N", "Nhd", "Morb", "Odds", "OR")]
+round(Table1, 3)
 ```
 
-### Step 3 --- *(edit me)*
+# Section 2. Model definition
 
-```{r step-3}
+The model for the change in odds of heart disease with blood pressure is
 
+$$Odds = e^{\eta} + \textit{binomial error}, \qquad \eta = \beta_{ref} + \beta_{bP}\, bP$$
+Replacing the terms we have,
+
+$$Odds = e^{\beta_{ref} + \beta_{bP}\, bP} + \textit{binomial error}$$
+
+
+Response: the proportion $N_{hd}/N$ of men who developed heart disease (binomial counts out of $N$ men)
+
+Explanatory variable: blood pressure bP (continuous, mmHg)
+
+Error: binomial
+
+```{r normal_vs_binomial}
+set.seed(42)
+
+# Set up side-by-side plots and save original graphics settings
+op <- par(mfrow = c(1, 2), mar = c(4.5, 4.5, 3.5, 1.5))
+
+# ==========================================================
+# 1. NUMERIC (CONTINUOUS) VARIABLE -> NORMAL ERROR
+# ==========================================================
+x_num  <- seq(30, 75, length.out = 60)
+mu_num <- 95 + 0.75 * x_num                  # Linear expected value E(Y)
+sigma  <- 8                                  # Constant error standard deviation
+y_num  <- rnorm(length(x_num), mean = mu_num, sd = sigma)
+
+plot(x_num, y_num,
+     pch = 16, col = rgb(0.2, 0.4, 0.7, 0.7),
+     ylim = c(95, 175),
+     xlab = "Predictor (e.g., Age in years)",
+     ylab = "Numeric response (e.g., Blood pressure)",
+     main = "Numeric Variable\n(Normal Error)")
+
+lines(x_num, mu_num, col = "black", lwd = 2)
+lines(x_num, mu_num + 1.96 * sigma, col = "firebrick", lty = 2, lwd = 1.5)
+lines(x_num, mu_num - 1.96 * sigma, col = "firebrick", lty = 2, lwd = 1.5)
+
+legend("topleft",
+       legend = c("Observed Y", "Expected E(Y)", "95% Normal range (constant)"),
+       pch = c(16, NA, NA), lty = c(NA, 1, 2), lwd = c(NA, 2, 1.5),
+       col = c(rgb(0.2, 0.4, 0.7, 0.7), "black", "firebrick"),
+       bty = "n", cex = 0.8)
+
+# ==========================================================
+# 2. PROPORTION VARIABLE (p = N_hd / N) -> BINOMIAL ERROR
+# ==========================================================
+bP   <- seq(105, 185, length.out = 60)
+N    <- 20                                   # Men per blood pressure group
+eta  <- -14.5 + 0.10 * bP                    # Linear predictor (log-odds)
+E_p  <- exp(eta) / (1 + exp(eta))            # Expected morbidity E(p)
+N_hd <- rbinom(length(bP), size = N, prob = E_p)
+p_obs <- N_hd / N                            # Observed proportion
+
+# Smooth grid for expected curve and 95% binomial prediction interval
+bP_grid  <- seq(105, 185, length.out = 200)
+eta_grid <- -14.5 + 0.10 * bP_grid
+p_grid   <- exp(eta_grid) / (1 + exp(eta_grid))
+low_bin  <- qbinom(0.025, size = N, prob = p_grid) / N
+high_bin <- qbinom(0.975, size = N, prob = p_grid) / N
+
+plot(bP, p_obs,
+     pch = 16, col = rgb(0.1, 0.6, 0.4, 0.7),
+     ylim = c(-0.05, 1.12),
+     xlab = "Blood pressure (bP)",
+     ylab = "Proportion response (p = N_hd / N)",
+     main = "Proportion Variable\n(Binomial Error, N = 20)")
+
+abline(h = c(0, 1), col = "gray60", lty = 3) # Hard bounds at 0 and 1
+lines(bP_grid, p_grid, col = "black", lwd = 2)
+lines(bP_grid, high_bin, col = "firebrick", lty = 2, lwd = 1.5)
+lines(bP_grid, low_bin, col = "firebrick", lty = 2, lwd = 1.5)
+
+legend("topleft",
+       legend = c("Observed p = N_hd / N", "Expected morbidity E(p)", "95% Binomial range (varies)"),
+       pch = c(16, NA, NA), lty = c(NA, 1, 2), lwd = c(NA, 2, 1.5),
+       col = c(rgb(0.1, 0.6, 0.4, 0.7), "black", "firebrick"),
+       bty = "n", cex = 0.8)
+
+# Restore original graphics parameters
+par(op)
 ```
 
-## Diagnostics / verification
+Describe the model in words:
 
-*(Residual plots, randomization overlays, homogeneity checks, or other
-verification appropriate to this lab's method. Primary tools this week:*
-`glm(family = binomial)`*.)*
+> **Your answer:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-```{r diagnostics}
+The observed odds of developing heart disease is the expected odds $e^{\eta}$ + plus random binomial error $\textit{binomial error}$. The expected odds change exponentially with blood pressure.
 
+# Section 3. Model execution
+
+Fit the logistic regression with `glm()`: binomial error, logit link, response entered as the proportion `Nhd / N` with the number of trials `N` as **weights**.
+(Equivalent alternative: `cbind(Nhd, N - Nhd) ~ bP`, giving the numbers of successes and failures.)
+
+```{r fit}
+HdModel <- glm(Nhd / N ~ bP, family = binomial(link = logit), weights = N, data = Cornfield)
+summary(HdModel)
+
+# Parameter estimates: beta_ref (intercept) and beta_bP (slope on the log-odds scale)
+beta_ref <- unname(coef(HdModel)[1])
+beta_bP  <- unname(coef(HdModel)[2])
+round(c(beta_ref = beta_ref, beta_bP = beta_bP), 4)
+
+# Same model with the successes / failures form of the response (check: identical estimates)
+#HdModel_b <- glm(cbind(Nhd, N - Nhd) ~ bP, family = binomial, data = Cornfield)
+#all.equal(coef(HdModel), coef(HdModel_b))
 ```
 
-## Exercises
 
-Work through the following and show your code and output for each.
+Report the Parameter estimates:
 
-1. *(exercise 1 --- edit me)*
-2. *(exercise 2 --- edit me)*
-3. *(exercise 3 --- edit me)*
+> **Your answer:** 
+$\hat\beta_{ref} = -6.082$
+$\hat\beta_{bP} = 0.0243$
 
-## Submission questions
+**Interpretation of the parameters.** 
 
-Answer in complete sentences below each question. These responses, together
-with your code above, are graded against this lab's key deliverable:
-**Fitted logistic model with interpretation**.
+(1) The intercept is the predicted log-odds of heart disease when the predictor variable equals $0$
+At $bP = 0\text{ mmHg}$, $\eta = -6.082$ BUT $\eta$ is on the log-scale
 
-**Q1.** *(question --- edit me)*
+On the odds scale:$E(\text{odds}) = e^{-6.082} \approx 0.0023$ cases per non-case.
 
-> *(your answer here)*
+(2) The slope tells us how the risk of heart disease changes with blood pressure
 
-**Q2.** *(question --- edit me)*
+On the log-scale: Every $+1\text{ mmHg}$ increase in blood pressure adds $0.0243$ to the linear predictor $\eta$. $\beta_{bP} > 0$, thus, higher blood pressure increases heart disease risk
 
-> *(your answer here)*
+On the odds scale: the slope turns addition into a constant multiplier:$$e^{0.02434} \approx 1.0246$$
 
-**Q3.** *(question --- edit me)*
+Each $+1\text{ mmHg}$ increase in blood pressure multiplies the expected odds of heart disease by $1.0246$, that is $2.46\%$ increase in odds per mmHg.
 
-> *(your answer here)*
+*Using the model for prediction*
 
-## Submission checklist
+Calculate the odds of heart disease at bP = 111.5 mmHg. 
 
-- [ ] Code chunks all run top-to-bottom without error (Knit ▸ Knit to HTML)
-- [ ] All placeholder text above has been replaced
-- [ ] Submission questions answered in full sentences
-- [ ] File renamed / submitted per course LMS instructions
-
----
-
-```{r session-info}
-sessionInfo()
+```{r interp1}
+exp(beta_ref)                      # e^beta_ref: the odds when bP = 0 (an extrapolation, far outside the data)
+exp(beta_ref + beta_bP * 111.5)    # the odds at bP = 111.5 mmHg (uses both parameters)
 ```
+
+
+*The model predicts $0.0344$ men developing heart disease for every $1$ man who does not, in other words, $3.44$ men develop heart disease for every $100$ men* 
+
+Calculate the rate of change in the odds per unit change in blood pressure, $e^{\beta_{bP}}$, in %/mmHg.
+
+```{r interp2}
+exp(beta_bP)                       # exp(slope) factor by which the odds are multiplied per +1 mmHg
+100 * (exp(beta_bP) - 1)           # per cent change in the odds per mmHg
+# The formula comes directly from combining the multiplicative property of exponents with the standard definition of percent change.
+```
+
+
+A percent change of $2.4637\%$ per mmHg means that for every $+1\text{ mmHg}$ increase in blood pressure, a man's expected odds of developing heart disease increase by about $2.46\%$ 
+
+# Section 4. More calculations: expected odds ratios, expected odds and expected proportions
+
+## Table 2: expected odds ratio (the ratio of two odds)
+
+$\Delta bP$ is the blood pressure minus the reference (111.5). The expected odds ratio is $E(OR) = e^{\beta_{bP}\,\Delta bP}$.
+
+```{r t2}
+Cornfield$bP
+Cornfield$bP[1]
+# Change the NA_real_ into the blood pressure minus the reference BP (111.5) 
+Table2 = data.frame(bP = Cornfield$bP, dbP = NA_real_)   # change in bP from the reference
+Table2$E_OR = exp(beta_bP * Table2$dbP)                                           # E(OR) = exp(beta_bP * dbP)
+round(Table2, 3)
+```
+
+## Table 3: expected odds
+
+Using both parameter estimates, calculate the expected odds at each observed blood pressure level
+
+Use both parameters: $\eta = \beta_{ref} + \beta_{bP}\, bP$ and $E(odds) = e^{\eta}$. 
+
+We calculate: (1) slope x BP (2) linear predictor and (3) expected odds from estimated parameters (refer to the table in prelimary for details)
+
+```{r t3}
+Cornfield$bP
+# Change beta_ref to the correct value
+Table3 <- data.frame(bP = Cornfield$bP, beta_ref = beta_ref, beta_bP = beta_bP)
+Table3
+Table3$beta_bP_x_bP = beta_bP * Table3$bP          # beta_bP * bP slope x BP
+Table3
+Table3$eta = Table3$beta_ref + Table3$beta_bP_x_bP   # linear predictor
+Table3
+Table3$E_Odds = exp(Table3$eta)               # expected odds
+round(Table3, 3)
+```
+
+**Prediction at an unobserved value.** Calculate the expected odds ratio and the expected odds at bP = 181.5 mmHg (not in the data).
+
+```{r pred181}
+# Hints: same formulas as Tables 2 and 3, with bP = 181.5
+# Change 0 to get the correct answer
+bP_new <- 181.5
+c(E_OR   = exp(beta_bP * (0 - 111.5)),         # expected odds ratio relative to 111.5
+  E_Odds = exp(beta_ref + beta_bP * bP_new))   # expected odds at 181.5
+```
+
+## Table 4: expected morbidity
+
+The formula to calculate the expected morbidity from odds is $$p = odds / (1 + odds)$$ 
+
+```{r t4}
+# Hints: E(Morb) = E(Odds) / (1 + E(Odds))
+Table4 = data.frame(bP = Cornfield$bP, Obs_Morb = Cornfield$Morb)
+Table4$E_Morb = Table3$E_Odds / (1 + Table3$E_Odds)       # p = odds / (1 + odds)
+round(Table4, 3)
+```
+
+# Section 5. Model evaluation
+
+As in the general linear model, we check homogeneity and normality of the residuals.
+
+But with logistic regression we use **deviance residuals**.
+
+Plot the deviance residuals against the fitted proportions and make a normal scores plot. Label the points with the observation numbers (1 to 8).
+
+```{r diag, fig.width=7, fig.height=3.8, fig.cap="Lab 10: deviance residuals vs fitted proportions (left) and normal scores (right)."}
+dres  <- residuals(HdModel, type = "deviance")     # deviance residuals extracted
+fit_p <- fitted(HdModel)                           # fitted proportions extracted
+
+par(mfrow = c(1, 2))
+# Left: deviance residuals against the fitted proportions
+plot(fit_p, dres, xlab = "fitted proportion", ylab = "deviance residuals",
+     main = "Deviance residuals vs fits", xlim = c(0.02, 0.22), ylim = c(-1.5, 2.2))
+abline(h = 0, lty = 2)
+text(fit_p, dres, labels = 1:8, pos = 4)           # observation numbers
+
+# Right: normal scores plot of the deviance residuals
+q <- qqnorm(dres, main = "Normal scores", ylim = c(-1.5, 2.2))
+qqline(dres)
+text(q$x, q$y, labels = 1:8, pos = 3)
+par(mfrow = c(1, 1))
+
+round(dres, 2)
+```
+
+The first, second, and third observations deviate from the line, due primarily to the second
+observation.
+
+Observation 2 (bP = 121.5) has the largest deviance and is the outlier in both plots
+
+observations 1 and 3 deviate mainly because of it. Its observed morbidity (0.067) is much higher than the expected 0.042: given the model, too many men had heart disease at 121.5 mmHg. 
+The other residuals are small and the normal scores plot is otherwise close to the line.
+
+## Removing the outlier and refitting
+
+Set up a new data table **without** the bP = 121.5 row, refit the model, and report the new parameter estimates. Then calculate the expected odds ratio and the expected odds at bP = 191.5
+with the new estimates.
+
+```{r refit}
+Cornfield2 <- Cornfield[-2, c("bP", "N", "Nhd")]      # remove row 2 (bP = 121.5)
+# Define a new model without observation 2
+HdModel2 <- glm(Nhd / N ~ bP, family = binomial(link = logit), weights = N, data = Cornfield2)
+summary(HdModel2)
+
+beta2_ref <- unname(coef(HdModel2)[1])
+beta2_bP  <- unname(coef(HdModel2)[2])
+round(c(beta_ref = beta2_ref, beta_bP = beta2_bP), 4)
+
+# Expected odds ratio, odds and morbidity at bP = 191.5 with the new estimates
+bP_x <- 191.5
+E_OR2 <- exp(beta2_bP * (bP_x - 111.5))
+E_Odds2 <- exp(beta2_ref + beta2_bP * bP_x)
+c(E_OR = E_OR2, E_Odds = E_Odds2, E_Morb = E_Odds2 / (1 + E_Odds2))
+```
+
+### Report the new parameter estimates
+
+Report parameters by copying and pasting below:
+
+> **Answer.** New estimates: 
+$\hat\beta_{ref} = 1$
+$\hat\beta_{bP}$ = 1$
+At bP = 191.5: E(OR) = 1 and E(Odds) = 1 and E(Morb) = 1.
+
+### Parameter estimates before and after removal of bP = 121.5
+
+Question:
+
+Compare the parameter estimates and the expected morbidity, odds and odds ratio at bP = 191.5 before and after the removal. Comment on the direction of change.
+
+> **Answer.** the slope increased or decreased? (from 0.0243 to 0.0303, about +25 %) and the intercept increased or deacreased? (from -6.082 to -7.084).
+
+The observation 2 was an unusually high morbidity at a *low* blood pressure, so without it the increase of the log-odds with bP looks steeper.
+
+At bP = 191.5: 
+- Expected morbidity E(Morb) increased or decreased ? (from 0.194 to 0.218), 
+- Expected Odds E(Odds) increased or decreased?  (from 0.241 to 0.278)
+- Expected Odds ratio  (E(OR)) increased or decreased? (from 7.01 to 11.30). 
+
+Which one changed the most? E(Morb) or E(Odds) or E(OR)? 
+
+### Generalization
+
+State the direction of change in the expected morbidity, expected odds and expected odds ratio at **any** level of bP when the regression parameter $\beta_{bP}$ increases or decreases.
+Check your generalization against several values of bP: this table compares the values before and after at every observed bP.
+
+```{r q3}
+chk <- data.frame(bP = Cornfield$bP)
+chk$OR_before <- exp(beta_bP  * (chk$bP - 111.5))
+chk$OR_after <- exp(beta2_bP * (chk$bP - 111.5))
+chk$Odds_before <- exp(beta_ref  + beta_bP  * chk$bP)
+chk$Odds_after <- exp(beta2_ref + beta2_bP * chk$bP)
+chk$Morb_before <- chk$Odds_before / (1 + chk$Odds_before)
+chk$Morb_after <- chk$Odds_after  / (1 + chk$Odds_after)
+round(chk, 3)
+
+# The blood pressure at which the two fitted log-odds lines cross
+(beta2_ref - beta_ref) / (beta_bP - beta2_bP)
+```
+
+> **Answer:** 
+**Expected odds ratio:** $E(OR) = e^{\beta_{bP}\,\Delta bP}$ depends only on $\beta_{bP}$. 
+For every bP above the reference ($\Delta bP > 0$) it **increases** when $\beta_{bP}$ increases and **decreases** when $\beta_{bP}$ decreases (at the reference it is always 1).
+
+The table shows OR_after > OR_before at every bP > 111.5. 
+
+**Expected odds and morbidity:** they depend on both parameters ($\beta_{ref}$ and $\beta_{bp}$) through $\eta = \beta_{ref} + \beta_{bP}\, bP$. If $\beta_{ref}$ is fixed, a larger $\beta_{bP}$ raises $\eta$, hence the odds and the morbidity, at every bP > 0 (morbidity moves with the odds because $p = odds/(1+odds)$ is increasing). 
+
+
+```{r q4, fig.width=10, fig.height=3.8}
+# Grid of blood pressures and the two fitted curves (before = all 8 points, after = without bP = 121.5)
+bP_seq <- seq(105, 195, by = 0.5)
+eta_before <- beta_ref  + beta_bP  * bP_seq                 # log-odds, before
+eta_after  <- beta2_ref + beta2_bP * bP_seq                 # log-odds, after
+OR_before  <- exp(beta_bP  * (bP_seq - 111.5))           # expected odds ratio (reference 111.5)
+OR_after   <- exp(beta2_bP * (bP_seq - 111.5))
+p_before   <- 1 / (1 + exp(-eta_before))              # expected morbidity = odds / (1 + odds)
+p_after    <- 1 / (1 + exp(-eta_after))
+
+cross <- (beta2_ref - beta_ref) / (beta_bP - beta2_bP)            # bP where the two log-odds lines cross
+col_b <- "black"; col_a <- "blue"                     # before = black solid, after = blue dashed
+pt_col <- ifelse(Cornfield$bP == 121.5, "red", "grey40")   # observation 2 (bP = 121.5) in red
+
+par(mfrow = c(1, 3), mar = c(4.5, 4.5, 3, 1))
+
+# Panel A: log-odds scale: two straight lines that pivot around a crossing point
+plot(bP_seq, eta_before, type = "l", lwd = 2, col = col_b, ylim = c(-4.2, -1),
+     xlab = "blood pressure (mmHg)", ylab = "log-odds  (eta)", main = "A. Log-odds: the line pivots")
+lines(bP_seq, eta_after, lwd = 2, lty = 2, col = col_a)
+points(Cornfield$bP, log(Cornfield$Odds), pch = 16, col = pt_col)   # observed log-odds
+abline(v = cross, lty = 3)
+text(cross, -4.1, paste0("cross at ", round(cross)), pos = 4, cex = 0.8)
+legend("topleft", legend = c("all 8 points", "without bP = 121.5", "obs. 2 (121.5)"),
+       lty = c(1, 2, NA), pch = c(NA, NA, 16), col = c(col_b, col_a, "red"), lwd = c(2, 2, NA), bty = "n", cex = 0.8)
+
+# Panel B: odds ratio scale: depends on the slope only, so 'after' is above 'before' beyond the reference
+plot(bP_seq, OR_before, type = "l", lwd = 2, col = col_b, ylim = c(0, 15),
+     xlab = "blood pressure (mmHg)", ylab = "odds ratio vs 111.5", main = "B. Odds ratio: slope only")
+lines(bP_seq, OR_after, lwd = 2, lty = 2, col = col_a)
+points(Cornfield$bP, Cornfield$OR, pch = 16, col = pt_col)           # observed odds ratios
+abline(h = 1, lty = 3)
+
+# Panel C: morbidity scale: S-shaped curves that cross (same crossing point as panel A)
+plot(bP_seq, p_before, type = "l", lwd = 2, col = col_b, ylim = c(0, 0.25),
+     xlab = "blood pressure (mmHg)", ylab = "morbidity", main = "C. Morbidity: curves cross")
+lines(bP_seq, p_after, lwd = 2, lty = 2, col = col_a)
+points(Cornfield$bP, Cornfield$Morb, pch = 16, col = pt_col)          # observed morbidity
+abline(v = cross, lty = 3)
+
+par(mfrow = c(1, 1))
+```
+
+Panel A: a larger slope with a lower intercept means the line is lower below 168 and higher above it.
+Panel B: the odds ratio depends only on the slope, so it is higher everywhere past the reference.
+Panel C: morbidity follows the same crossing as the log-odds
+
+\newpage
+
+## Extra: the formula for a proportion from the odds
+
+Starting from $odds = p/(1-p)$, use algebra to obtain $p = odds/(1 + odds)$.
+
+> **Answer.** $odds = \dfrac{p}{1-p} \;\Rightarrow\; odds\,(1-p) = p \;\Rightarrow\; odds - odds\cdot p = p \;\Rightarrow\; odds = p + odds\cdot p = p\,(1 + odds) \;\Rightarrow\; p = \dfrac{odds}{1 + odds}.$
+
